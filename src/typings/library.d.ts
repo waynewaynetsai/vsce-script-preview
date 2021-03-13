@@ -47,6 +47,7 @@ export interface LibraryApi {
     setCursorPosition: (pos: vscode.Position) => Promise<any>;
   };
   fs: {
+    getCurrentWorkspaceFolder: () => vscode.WorkspaceFolder | undefined;
     copyFileOrFolder: (source: string, target: string, option: { overwrite: boolean }) => Thenable<void>;
     createNewFile: (filename: string, content: string, fsPath?: string) => Thenable<void>;
     createNewFolder: (name: string, fsPath?: string) => Thenable<void>; 
