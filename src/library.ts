@@ -3,7 +3,7 @@ import { inject, provide } from 'injection';
 import * as vscode from 'vscode';
 import * as packageJSON from '../package.json';
 import { completionRegisterFactory, execCmd, execShell, invokeCommands, runAutomation, runCommands, runMacro, spawnShell, type, typeCharUnderCursor, typeKeys, writeText } from './command';
-import { createNewFile, createNewFolder, findFirstOccurCharAboveCursor, findFirstOccurCharAtLine, getCharAt, getCharUnderCursor, getCurrentLine, getCursorPosition, getFirstCharOnLine, getLine, getSelectedText, setCursorPosition, switchToInsertModeSelection } from './editor'; import { Instance } from './instance';
+import { copyFileOrFolder, createNewFile, createNewFolder, findFirstOccurCharAboveCursor, findFirstOccurCharAtLine, getCharAt, getCharUnderCursor, getCurrentLine, getCursorPosition, getFirstCharOnLine, getLine, getSelectedText, setCursorPosition, switchToInsertModeSelection } from './editor'; import { Instance } from './instance';
 import { confirm, dropdown, input } from './interactive';
 import { commandQuickpick } from './registry';
 import { CommandRegistry } from './registry/registry';
@@ -60,6 +60,11 @@ export class Library {
                 findFirstOccurCharAboveCursor,
                 getCursorPosition,
                 setCursorPosition
+            },
+            fs: {
+                copyFileOrFolder,
+                createNewFile,
+                createNewFolder
             },
             interactive: {
                 confirm,
