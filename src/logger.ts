@@ -9,7 +9,7 @@ class LoggerChannel {
     }
 
     constructor() {
-        this._channel = vscode.window.createOutputChannel('vsce-script');
+        this._channel = vscode.window.createOutputChannel('Vsce Script');
     }
 
     public info(msg: string) {
