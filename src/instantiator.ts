@@ -33,9 +33,7 @@ export class Instantiator {
   private static async setupIocContainer(context: vscode.ExtensionContext, ctors: any[]) {
     const container = new Container();
     container.registerObject(Instance.ExtensionContext, context);
-    for (const Constructor of ctors) {
-      container.bind(Constructor);
-    }
+    ctors.forEach(Constructor => container.bind(Constructor));
     return container;
   }
 
