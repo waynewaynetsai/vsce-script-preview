@@ -12,6 +12,11 @@ class LoggerChannel {
         this._channel = vscode.window.createOutputChannel('Vsce Script');
     }
 
+    public log(msg: string) {
+        this._channel?.appendLine(msg);    
+        return this;
+    }
+
     public info(msg: string) {
         this._channel?.appendLine(`[Info] ${msg}`);
         return this;
