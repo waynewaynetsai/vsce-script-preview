@@ -41,7 +41,7 @@ export class Library {
             },
             promise: {
                 execCmd: (payload: string | { command: string; args: object; }) => execCmd(payload)(),
-                execShell: (cmd: string) => execShell(cmd)(),
+                execShell: (cmd: string, options: SpawnOptions & { hiddenOutput?: boolean } = { hiddenOutput: false }) => execShell(cmd, options)(),
                 spawnShell: (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args)(),
                 typeCharUnderCursor: () => typeCharUnderCursor(),
                 type: (text: string) => type(text)(),
