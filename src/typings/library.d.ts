@@ -34,7 +34,7 @@ export interface LibraryApi {
     invokeCommands: (...args: any[]) => Thenable<void>;
   };
   editor: {
-    registerCompletionProvider: ( selector: vscode.DocumentSelector, completionItemProvider: vscode.CompletionItemProvider<vscode.CompletionItem>, ...triggerCommitCharacters: string[]) => void;
+    registerCompletionProvider: (selector: vscode.DocumentSelector, completionItemProvider: vscode.CompletionItemProvider<vscode.CompletionItem>, ...triggerCommitCharacters: string[]) => void;
     getLine: (lineNumber: number) => string | undefined;
     getCurrentLine: (editor: vscode.TextEditor) => string;
     getCharAt: ( document: vscode.TextDocument, position: vscode.Position) => string;
@@ -46,6 +46,11 @@ export interface LibraryApi {
     getCursorPosition: () => vscode.Position | undefined;
     setCursorPosition: (pos: vscode.Position) => Promise<any>;
   };
+  fs: {
+    copyFileOrFolder: (source: string, target: string, option: { overwrite: boolean }) => Thenable<void>;
+    createNewFile: (filename: string, content: string, fsPath?: string) => Thenable<void>;
+    createNewFolder: (name: string, fsPath?: string) => Thenable<void>; 
+  },
   promise: {
     execCmd: ( payload: string | { command: string; args: object }) => Thenable<unknown>;
     execShell: (cmd: string) => Thenable<void>;
@@ -58,7 +63,7 @@ export interface LibraryApi {
   interactive: {
     confirm: ( title: string, placeHolder?: "Yes" | "No", options?: vscode.QuickPickOptions) => Promise<boolean>;
     input: ( prompt: string, placeHolder: string, options?: vscode.InputBoxOptions) => Promise<string>;
-    dropdown: ( title: string, items: string[], placeHolder: string, options?: vscode.QuickPickOptions) => Promise<string | undefined>;
+    dropdown: (title: string, items: string[], placeHolder: string, options?: vscode.QuickPickOptions) => Promise<string | undefined>;
     commandQuickpick: ( setting: QuickpickSetting) => Promise<void>;
   };
 }
