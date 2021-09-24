@@ -1,5 +1,5 @@
 import { execCmd, invokeCommands, runMacro, spawnShell } from "../command";
-import { copyProjectTemplate, getCurrentLine, getCursorPosition, openProject, switchToInsertModeSelection } from "../editor";
+import { copyFileOrFolder, getCurrentLine, getCursorPosition, openProject, switchToInsertModeSelection } from "../editor";
 import { confirm, dropdown, input } from "../interactive";
 import { logger } from "../logger";
 import * as vscode from 'vscode';
@@ -63,7 +63,7 @@ export async function createProject() {
     // STEP3: generate project template/copy file or folder
     try {
         const projectTemplatePath = path.resolve(__dirname, `../template/${projectType}`);
-        await copyProjectTemplate(projectTemplatePath, projectPath, { overwrite: false });
+        await copyFileOrFolder(projectTemplatePath, projectPath, { overwrite: false });
     } catch (err) {
         logger.error(`Fail to create script project: ${JSON.stringify(err)}`);
         vscode.window.showErrorMessage(`Fail to create script project: ${JSON.stringify(err)}`);
