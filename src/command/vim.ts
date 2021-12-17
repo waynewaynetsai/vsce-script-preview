@@ -1,11 +1,5 @@
-import { TypeCommand } from "../models/index";
 import * as vscode from "vscode";
-import { invokeCommands } from "./command";
-
-// export const runMacro = (inputs: string[]) => {
-//     const commands = inputs.map(i => makeTypeCommand(i));
-//     return invokeCommands(commands);
-// };
+import { CommandFactory, TypeCommand } from "../models";
 
 export const makeTypeCommand = (input: string): TypeCommand => {
     return {
@@ -16,8 +10,17 @@ export const makeTypeCommand = (input: string): TypeCommand => {
     };
 };
 
-export const handleKeyEvent = (cmd: string) => {
-    return vscode.commands.executeCommand("type", {
-        text: cmd
-    });
-};
+export function invokeCommands(commands: CommandFactory[]) {
+	return commands.reduce((acc, curr) => acc.then(_ => curr()), Promise.resolve(null) as Thenable<null>);
+}
+
+export function type(typeText: string): () => Thenable<void> {
+	return () => vscode.commands.executeCommand("type", { text: typeText });
+}
+
+export function typeCommands(texts: string[]): (() => Thenable<void>)[] {
+	return texts.map(t => type(t));
+}
+
+export const runMacro = (cmds: string[]) => invokeCommands(typeCommands(cmds));
+

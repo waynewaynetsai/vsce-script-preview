@@ -1,8 +1,9 @@
 {
-  "name": "vsce-script",
+	"name": "vsce-script",
 	"displayName": "vsce-script",
+	"publisher": "waynetsai",
 	"description": "vscode extension script",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.53.0"
 	},
@@ -10,16 +11,84 @@
 		"Other"
 	],
 	"activationEvents": [
-        "*"
+		"*"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vsce-script.helloWorld",
+				"command": "workspace-api.getSettings",
+				"title": "practice: GetSettings"
+			},
+			{
+				"command": "vsce-script.testCmd",
 				"title": "Hello World"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Practice-Workspace",
+			"properties": {
+				"practice-workspace.input": {
+					"type": "string",
+					"default": "defaultValue",
+					"description": "provide a input for accepting value"
+				},
+				"practice-workspace.inputNum": {
+					"type": "number",
+					"default": "1.001",
+					"description": "provide a input for accepting number"
+				},
+				"practice-workspace.inputInt": {
+					"type": "integer",
+					"default": "1",
+					"markdownDescription": "MarkdownDescription: provide a input for accepting integer, See the [VSCode Docs (https://code.visualstudio.com/api/references/contribution-points#contributes.configuration) for more details.\n - a: item1\n - b: itemb"
+				},
+				"practice-workspace.checkbox": {
+					"type": "boolean",
+					"default": "0",
+					"description": "provide a checkbox"
+				},
+				"practice-workspace.dropdown": {
+					"type": "string",
+					"default": "defaultValue",
+					"enum": [
+						"optionA",
+						"optionB",
+						"optionC"
+					],
+					"description": "provide a dropdown and options",
+					"enumDescriptions": [
+						"description for option A",
+						"description for option B",
+						"description for option C"
+					]
+				},
+				"practice-workspace.array": {
+					"type": "array",
+					"default": [
+						"defaultValue"
+					],
+					"description": "array settings is only available at settings.json"
+				},
+				"practice-workspace.object": {
+					"type": "object",
+					"default": {
+						"key": "defaultValue"
+					},
+					"description": "object settings is only available at settings.json"
+				},
+				"practice-workspace.null.a": {
+					"type": null,
+					"default": null,
+					"description": "null settings for showing group feature"
+				},
+				"practice-workspace.null.b": {
+					"type": null,
+					"default": null,
+					"description": "null settings for showing group feature"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run package",

@@ -1,67 +1,40 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { commandRegisterFactory, execCmd, invokeCommands, runMacro, type, typeCommands } from './command';
+import { commandRegisterFactory, execCmd, invokeCommands, runMacro, type } from './command';
+import { getCurrentLine, getCursorPosition, setCursorPosition, switchToInsertModeSelection } from './editor';
+import { logger } from './logger';
 
-function getCursorPosition() {
-	const editor = vscode.window.activeTextEditor;
-	if (!editor) return;
-	return editor.selection.active;
+class MockGit {
+
+	private head = 0;
+
+	private branchs = ['11.1-master'];
+	public get currentBranch() {
+		return this.branchs[this.head];
+	}
+	public checkout(branchName: string) {
+		this.head = this.branchs.findIndex(n => n === branchName);
+		return this.currentBranch;
+	}
+
+	public branch(newBranch?: string) {
+		if (newBranch) {
+			this.branchs.push(newBranch);
+		}
+		return this.branchs;
+	}
 }
 
-function setCursorPosition(pos: vscode.Position): () => Promise<any>{
-	return () => new Promise((resolve, _reject) => {
-		const editor = vscode.window.activeTextEditor;
-		if (!editor) return;
-		setTimeout(() => {
-			const endPos = new vscode.Position(pos.line, pos.character-1);
-			const selection = new vscode.Selection(endPos, endPos);
-			editor.selection = selection;
-			resolve(null);
-		}, 0);
-	});
-}
-
-function getCurrentLine(editor: vscode.TextEditor): string {
-	return editor.document.lineAt(editor.selection.active.line).text;
-}
-
-function switchToInsertModeSelection(): Promise<void> {
-	return new Promise((resolve, _reject) => {
-		const editor = vscode.window.activeTextEditor;
-		const prevSel = editor?.selections;
-		if (!prevSel) return;
-		const enterInsertMode = typeCommands(["<Esc>", "i"]);
-		invokeCommands(enterInsertMode);
-		setTimeout(() => {
-			editor.selection = new vscode.Selection(0, 0, 0, 0);
-			editor.selections = prevSel.map((sel: vscode.Selection) => new vscode.Selection(
-				sel.start.line,
-				sel.start.character,
-				sel.end.line,
-				sel.end.character
-			))
-			resolve();
-		}, 0);
-	});
-}
-
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "vsce-script" is now active!');
+	logger.info('Active vsce-script extension!');
 
 	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
 
-	registerCommand("vsce-script.cmd", () => {
+	registerCommand("vsce-script.testCmd", () => {
 		vscode.window.showInformationMessage("script commands");
-		runMacro(["<Esc>", "i", " ", "{", "}", "<left>", "\n"]);
 	});
 
-	registerTextEditorCommand('vsce-script.addBracket', (editor) => {
+	registerTextEditorCommand('vsce-script.addBracket', (editor: vscode.TextEditor) => {
 		const str = getCurrentLine(editor);
 		const lastChar = str.charAt(str.length - 1);
 		const hasWhitespace = lastChar === " ";
@@ -74,7 +47,6 @@ export function activate(context: vscode.ExtensionContext) {
 		} else {
 			runMacro([" ", "{", "}", "<left>", "\n"]);
 		}
-		vscode.window.showInformationMessage(str);
 	});
 
 	registerCommand("vsce-script.surroundWith", () => {
@@ -82,41 +54,127 @@ export function activate(context: vscode.ExtensionContext) {
 			switchToInsertModeSelection,
 			execCmd("surround.with")
 		]);
-		// invokeCommands([
-		// 	...enterInsertMode,
-		// ]);
-		// // await vscode.commands.executeCommand('type', { text: 'x'});
-		// await vscode.commands.executeCommand('extension.vim_escape');
-		// await vscode.commands.executeCommand('extension.vim_insert');
-
-		// 	console.log('args', arg);
-		// 	if (arg?.commands) {
-		// 		invokeCommands(arg);
-		// 	}
-		// }, 0);
 	});
 
-	registerCommand("vsce-script.visualModeYank", async () => {
+	registerCommand("vsce-script.visualModeYank", () => {
 		const pos = getCursorPosition();
-		if (!pos) return; 
+		if (!pos) return;
 		invokeCommands([
 			type("y"),
 			setCursorPosition(pos),
 		]);
-		// await ;
-		// editor.selection.active = cursorPos;
-	});
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('vsce-script.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from vsce-script!');
 	});
 
-	context.subscriptions.push(disposable);
+	registerCommand("vsce-script.command-quickpick", async (setting: QuickpickSetting) => {
+		const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
+			...originalSetting,
+			description: `$(gear)command:${originalSetting.command}`,
+		}));
+		const selected = await vscode.window.showQuickPick(items, {
+			title: setting.title,
+			matchOnDescription: true
+		});
+		if (!selected) return;
+		vscode.commands.executeCommand(selected.command!, selected.args!);
+	});
+
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() { }
+
+interface QuickpickSetting {
+	title: string;
+	default?: string;
+	items: QuickpickCommandItem[]
+}
+
+interface QuickpickCommandItem extends vscode.QuickPickItem {
+	label: string;
+	command: string;
+	args?: any;
+}
+
+
+function runMacroDemo(context: vscode.ExtensionContext) {
+	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
+
+	const searchWord = (word: string) => ["/", `${word}`, "\n"];
+	const goTop = ["g", "g"];
+	const deleteCurrentLine = ["d", "d"];
+
+	const removeComponent = (tagName: string) => [
+		"<Esc>",
+		...goTop,
+		...searchWord(tagName),
+		...deleteCurrentLine,
+		...searchWord(tagName),
+		...deleteCurrentLine
+	];
+
+	registerCommand("vsce-script.runMacro", async (name: string) => {
+		switch (name) {
+			case 'RemoveChildComponent':
+				const tagName = await vscode.window.showInputBox({
+					title: 'Delete component import and html tag',
+					placeHolder: 'enter your full component tag name'
+				});
+				if (tagName) {
+					const dynamicMacro = removeComponent(tagName);
+					runMacro(dynamicMacro);
+				}
+				break;
+			default:
+				break;
+		}
+	});
+}
+
+function demo(context: vscode.ExtensionContext) {
+
+	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
+
+	const updateCommandId = '11.1-userinput-api.updateItem';
+
+	const git = new MockGit();
+
+	let item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 10000);
+	item.text = git.currentBranch;
+	item.command = updateCommandId;
+	item.show();
+
+	const dropdown = async (dropdownItems: string[]) => await vscode.window.showQuickPick(dropdownItems, {
+		canPickMany: false,
+		placeHolder: `Select your git action`,
+	});
+
+	const input = async (placeHolder: string) => await vscode.window.showInputBox({
+		placeHolder
+	}) || '';
+
+	registerCommand(updateCommandId, async () => {
+		const answer = await dropdown(['Create new branch', ...git.branch()]) || '';
+
+		if (answer === 'Create new branch') {
+
+			const newBranchName = await input('New Branch Name');
+
+			git.branch(newBranchName);
+
+			item.text = git.checkout(newBranchName);
+
+			vscode.window.showInformationMessage(`Create new branch ${newBranchName}`);
+
+		} else if (answer !== '') {
+			item.text = git.checkout(answer);
+			vscode.window.showInformationMessage(`Checkout to branch ${git.currentBranch}`);
+		}
+	});
+
+	context.subscriptions.push(item);
+
+	registerCommand('workspace-api.getSettings', async () => {
+		const workspaceSettings = vscode.workspace.getConfiguration('practice-workspace');
+		console.log(workspaceSettings);
+	});
+
+}

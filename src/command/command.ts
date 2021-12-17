@@ -1,29 +1,20 @@
 import * as vscode from 'vscode';
-import { CommandPayload } from '../models';
 import * as cp from 'child_process';
+import { logger } from '../logger';
 
 export function commandRegisterFactory(context: vscode.ExtensionContext) {
 	const registerCommand = (commandId: string, commandHandler: (...args: any[]) => any) => {
 		const subscription = vscode.commands.registerCommand(commandId, commandHandler);
+		logger.debug(`registerCommand:${commandId}`);
 		context.subscriptions.push(subscription);
 	};
 	const registerTextEditorCommand = (commandId: string, commandHandler: (...args: any[]) => any) => {
 		const subscription = vscode.commands.registerCommand(commandId, commandHandler);
+		logger.debug(`registerTextEditorCommand:${commandId}`);
 		context.subscriptions.push(subscription);
 	};
 	return [registerCommand, registerTextEditorCommand];
 }
-
-export function type(typeText: string): () => Thenable<void> {
-	return () => vscode.commands.executeCommand("type", { text: typeText });
-}
-
-type CommandFactory<T = any> = () => Thenable<T>;
-
-export function invokeCommands(commands: CommandFactory[]) {
-	return commands.reduce((acc, curr) => acc.then(_ => curr()), Promise.resolve(null) as Thenable<null>);
-}
-
 
 export function execCmd<T = unknown>(cmd: string | { command: string; args: object }): () => Thenable<T> {
 	if (typeof cmd === 'string') {
@@ -43,12 +34,6 @@ export function insertSnippet(snippet: string) {
 		args: { snippet }
 	});
 }
-
-export function typeCommands(texts: string[]): (() => Thenable<void>)[] {
-	return texts.map(t => type(t));
-}
-
-export const runMacro = (cmds: string[]) => invokeCommands(typeCommands(cmds));
 
 export function execShell(cmd: string) {
 	return new Promise((resolve, reject) => {
