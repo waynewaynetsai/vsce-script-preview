@@ -18,9 +18,15 @@ export function commandRegisterFactory(context: vscode.ExtensionContext) {
 
 export function execCmd<T = unknown>(cmd: string | { command: string; args: object }): () => Thenable<T> {
 	if (typeof cmd === 'string') {
-		return () => vscode.commands.executeCommand(cmd);
+		return () => {
+			logger.info(`Execute VSCodeCommand: ${cmd}`);
+			return vscode.commands.executeCommand(cmd);
+		};
 	} else if (cmd.command && typeof cmd.command === 'string') {
-		return () => vscode.commands.executeCommand(cmd.command, cmd.args);
+		return () => {
+			logger.info(`Execute VSCodeCommand: ${cmd.command}, args: ${cmd.args}`);
+			return vscode.commands.executeCommand(cmd.command, cmd.args);
+		};
 	} else {
 		const msg = `Provide wrong command payload: ${cmd}`;
 		vscode.window.showErrorMessage(msg);
@@ -36,13 +42,20 @@ export function insertSnippet(snippet: string) {
 }
 
 export function execShell(cmd: string) {
-	return new Promise((resolve, reject) => {
-		cp.exec(cmd, (err, stdout, stderr) => {
-			if (err) {
-				console.error(stderr);
-				reject(err);
-			}
-			resolve(stdout);
+	return () => vscode.window.withProgress({ location: vscode.ProgressLocation.Notification }, async (progress) => {
+		progress.report({
+			message: `Execute shell command: ${cmd}...`,
+		});
+		await new Promise((resolve, reject) => {
+			cp.exec(cmd, (err, stdout, stderr) => {
+				if (err) {
+					console.error(stderr);
+					logger.error(`${err}`);
+					reject(err);
+				}
+				logger.info(stdout.toString());
+				resolve(stdout);
+			});
 		});
 	});
 }
