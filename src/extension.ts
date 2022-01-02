@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { commandRegisterFactory, execCmd, invokeCommands, runMacro, type } from './command';
+import { commandRegisterFactory, execCmd, execShell, invokeCommands, remapVimrcCommands, runMacro, type } from './command';
 import { getCurrentLine, getCursorPosition, setCursorPosition, switchToInsertModeSelection } from './editor';
 import { logger } from './logger';
 
@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 			runMacro([" ", "{", "}", "<left>", "\n"]);
 		}
 	});
-
+	
 	registerCommand("vsce-script.surroundWith", () => {
 		invokeCommands([
 			switchToInsertModeSelection,
@@ -78,6 +78,51 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.commands.executeCommand(selected.command!, selected.args!);
 	});
 
+	registerCommand("vsce-script.setupExtensionProject", async (args) => {
+		const { extension_id, vsix_path, dir_path } = args;
+		const cd = `cd ${dir_path};`
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension ${extension_id}`;
+		const install_latest_extension = `code --install-extension ${vsix_path}`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
+
+	registerCommand("vsce-script.setupVimProject", async () => {
+		const cd = `cd $HOME/Desktop/coding/coreapp/vscode-extension/Vim;`
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension vscodevim.vim-fork`;
+		const install_latest_extension = `code --install-extension /Users/tsaiwayne/Desktop/coding/coreapp/vscode-extension/Vim/vim-fork-1.21.5.vsix`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
+
+	registerCommand("vsce-script.setupVsceScriptProject", async () => {
+		const cd = `cd $HOME/Desktop/coding/coreapp/vscode-extension/vscode-webview-ui-toolkit-samples/vsce-script;`;
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension waynetsai.vsce-script`;
+		const install_latest_extension = `code --install-extension /Users/tsaiwayne/Desktop/coding/coreapp/vscode-extension/vscode-webview-ui-toolkit-samples/vsce-script/vsce-script-0.0.2.vsix`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
 }
 
 export function deactivate() { }
@@ -96,7 +141,7 @@ interface QuickpickCommandItem extends vscode.QuickPickItem {
 
 
 function runMacroDemo(context: vscode.ExtensionContext) {
-	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
+	const [registerCommand] = commandRegisterFactory(context);
 
 	const searchWord = (word: string) => ["/", `${word}`, "\n"];
 	const goTop = ["g", "g"];
