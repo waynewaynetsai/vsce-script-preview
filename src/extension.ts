@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { commandRegisterFactory, execCmd, execShell, invokeCommands, remapVimrcCommands, runMacro, type } from './command';
+import { commandRegisterFactory, execCmd, execShell, invokeCommands, runMacro, type } from './command';
 import { getCurrentLine, getCursorPosition, setCursorPosition, switchToInsertModeSelection } from './editor';
 import { logger } from './logger';
 
