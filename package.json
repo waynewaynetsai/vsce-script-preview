@@ -39,10 +39,15 @@
 		"configuration": {
 			"title": "VSCE Script",
 			"properties": {
-				"vsce-script.scriptPath": {
+				"vsce-script.projectPath": {
 					"type": "string",
 					"default": "",
-					"description": "Vsce script path"
+					"description": "Vsce script project path"
+				},
+				"vsce-script.commandPrefix": {
+					"type": "string",
+					"default": "vsce-script",
+					"description": "Vsce script command prefix"
 				},
 				"practice-workspace.input": {
 					"type": "string",
