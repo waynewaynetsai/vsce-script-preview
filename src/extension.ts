@@ -49,9 +49,19 @@ function registerAllCommands(context: vscode.ExtensionContext) {
 
 	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
 
+	// Dirty function for userflow but works, Take it easy!
 	registerCommand('vsce-script.createScriptProject', async () => {
-		vscode.window.showInformationMessage('Create Project!');
 		// STEP0: if there is defined project or given path, check whether override original project path config or not?
+		const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
+		if (existProjectPath) {
+			const projectName = path.basename(existProjectPath);
+			const ok = await confirm(`You have an exist script project (${projectName}), Open this project?`);
+			if (ok) {
+				const newWindow = await confirm('Open project in new window?');
+				await openProject(existProjectPath, { newWindow });
+				return;
+			}
+		}
 		// STEP1: ask typescript or javascript
 		const projectType: string | undefined = await dropdown('Create Typescript or Javascript script project?', [
 			'javascript',
@@ -75,7 +85,7 @@ function registerAllCommands(context: vscode.ExtensionContext) {
 		if (isProjectExist) {
 			const reuseProject = await confirm('Project is exist, Open this project?');
 			if (reuseProject) {
-				await invokeCommands([ openProject(projectPath) ]);	
+				await invokeCommands([openProject(projectPath)]);
 				return;
 			}
 		}
@@ -94,130 +104,135 @@ function registerAllCommands(context: vscode.ExtensionContext) {
 			// STEP5: open project folder
 			openProject(projectPath, { newWindow: true })
 		]);
-});
-
-registerCommand('vsce-script.openProject', () => {
-	const projectPath = vscode.workspace.getConfiguration('vsce-script.projectPath');
-
-});
-
-registerCommand('vsce-script.showAllCommands', () => {
-
-});
-
-registerCommand('vsce-script.insertDeclaration', (args) => {
-	const activeTextEditor = vscode.window.activeTextEditor;
-	if (!activeTextEditor) return;
-	try {
-		const { inserting, replacing, type } = args;
-		activeTextEditor.edit(editBuilder => {
-			const replacingStart = new vscode.Position(replacing.start.line, replacing.start.character);
-			const replacingEnd = new vscode.Position(replacing.end.line, replacing.end.character + type.length + 1);
-			editBuilder.replace(new vscode.Range(replacingStart, replacingEnd), ';');
-		}).then(_ => {
-			activeTextEditor.insertSnippet(
-				new vscode.SnippetString(type + " ${1:newLocal} = "),
-				new vscode.Position(inserting.line, inserting.character)
-			);
-		});
-	} catch (error) {
-		console.error(error);
-	}
-});
-
-registerCommand("vsce-script.testCmd", () => {
-	vscode.window.showInformationMessage("script commands");
-});
-
-registerTextEditorCommand('vsce-script.addBracket', (editor: vscode.TextEditor) => {
-	const str = getCurrentLine(editor);
-	const lastChar = str.charAt(str.length - 1);
-	const hasWhitespace = lastChar === " ";
-	const hasClosedParen = lastChar === ')';
-	const hasOpenedParen = str.includes('(');
-	if (hasWhitespace) {
-		runMacro(["{", "}", "<left>", "\n"]);
-	} else if (!hasClosedParen && hasOpenedParen) {
-		runMacro([")", " ", "{", "}", "<left>", "\n"]);
-	} else {
-		runMacro([" ", "{", "}", "<left>", "\n"]);
-	}
-});
-
-registerCommand("vsce-script.surroundWith", () => {
-	invokeCommands([
-		switchToInsertModeSelection,
-		execCmd("surround.with")
-	]);
-});
-
-registerCommand("vsce-script.visualModeYank", () => {
-	const pos = getCursorPosition();
-	if (!pos) return;
-	runMacro(['<Esc>', 'm', 'y', 'y', '`', 'y']);
-});
-
-registerCommand("vsce-script.command-quickpick", async (setting: QuickpickSetting) => {
-	const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
-		...originalSetting,
-		description: `$(gear)command:${originalSetting.command}`,
-	}));
-	const selected = await vscode.window.showQuickPick(items, {
-		title: setting.title,
-		matchOnDescription: true
 	});
-	if (!selected) return;
-	await vscode.commands.executeCommand(selected.command!, selected.args!);
-});
 
-registerCommand("vsce-script.setupExtensionProject", async (args) => {
-	const { extension_id, vsix_path, dir_path } = args;
-	const cd = `cd ${dir_path};`;
-	const vscePackage = ` yes | vsce package`;
-	const uninstall_extension = `code --uninstall-extension ${extension_id}`;
-	const install_latest_extension = `code --install-extension ${vsix_path}`;
-	const reload_window = `workbench.action.reloadWindow`;
-	await invokeCommands([
-		execShell(`${cd}${vscePackage}`),
-		execShell(uninstall_extension),
-		execShell(install_latest_extension),
-		execCmd(reload_window)
-	]);
-	logger.show();
-});
+	registerCommand('vsce-script.openProject', async () => {
+		const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
+		if (existProjectPath) {
+			const newWindow = await confirm('Open project in new window?');
+			await openProject(existProjectPath, { newWindow });
+		} else {
+			vscode.window.showInformationMessage('No project found! Please create a project first!');
+		}
+	});
 
-registerCommand("vsce-script.setupVimProject", async () => {
-	const cd = `cd $HOME/Desktop/coding/coreapp/vscode-extension/Vim;`;
-	const vscePackage = ` yes | vsce package`;
-	const uninstall_extension = `code --uninstall-extension vscodevim.vim-fork`;
-	const install_latest_extension = `code --install-extension /Users/tsaiwayne/Desktop/coding/coreapp/vscode-extension/Vim/vim-fork-1.21.5.vsix`;
-	const reload_window = `workbench.action.reloadWindow`;
-	await invokeCommands([
-		execShell(`${cd}${vscePackage}`),
-		execShell(uninstall_extension),
-		execShell(install_latest_extension),
-		execCmd(reload_window)
-	]);
-	logger.show();
-});
+	registerCommand('vsce-script.showAllCommands', () => {
 
-registerCommand("vsce-script.setupVsceScriptProject", async () => {
-	const projectPath = `/Users/tsaiwayne/Desktop/code/vscode-extensions/vsce-script-preview`;
-	const extensionId = `waynetsai.vsce-script`;
+	});
 
-	const cd = `cd ${projectPath};`;
-	const vscePackage = ` yes | vsce package`;
-	const uninstall_extension = `code --uninstall-extension ${extensionId}`;
-	const install_latest_extension = `code --install-extension ${projectPath}/vsce-script-${packageJson.version}.vsix`;
-	const reload_window = `workbench.action.reloadWindow`;
-	await invokeCommands([
-		execShell(`${cd}${vscePackage}`),
-		execShell(uninstall_extension),
-		execShell(install_latest_extension),
-		execCmd(reload_window)
-	]);
-	logger.show();
-});
+	registerCommand('vsce-script.insertDeclaration', (args) => {
+		const activeTextEditor = vscode.window.activeTextEditor;
+		if (!activeTextEditor) return;
+		try {
+			const { inserting, replacing, type } = args;
+			activeTextEditor.edit(editBuilder => {
+				const replacingStart = new vscode.Position(replacing.start.line, replacing.start.character);
+				const replacingEnd = new vscode.Position(replacing.end.line, replacing.end.character + type.length + 1);
+				editBuilder.replace(new vscode.Range(replacingStart, replacingEnd), ';');
+			}).then(_ => {
+				activeTextEditor.insertSnippet(
+					new vscode.SnippetString(type + " ${1:newLocal} = "),
+					new vscode.Position(inserting.line, inserting.character)
+				);
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	});
+
+	registerCommand("vsce-script.testCmd", () => {
+		vscode.window.showInformationMessage("script commands");
+	});
+
+	registerTextEditorCommand('vsce-script.addBracket', (editor: vscode.TextEditor) => {
+		const str = getCurrentLine(editor);
+		const lastChar = str.charAt(str.length - 1);
+		const hasWhitespace = lastChar === " ";
+		const hasClosedParen = lastChar === ')';
+		const hasOpenedParen = str.includes('(');
+		if (hasWhitespace) {
+			runMacro(["{", "}", "<left>", "\n"]);
+		} else if (!hasClosedParen && hasOpenedParen) {
+			runMacro([")", " ", "{", "}", "<left>", "\n"]);
+		} else {
+			runMacro([" ", "{", "}", "<left>", "\n"]);
+		}
+	});
+
+	registerCommand("vsce-script.surroundWith", () => {
+		invokeCommands([
+			switchToInsertModeSelection,
+			execCmd("surround.with")
+		]);
+	});
+
+	registerCommand("vsce-script.visualModeYank", () => {
+		const pos = getCursorPosition();
+		if (!pos) return;
+		runMacro(['<Esc>', 'm', 'y', 'y', '`', 'y']);
+	});
+
+	registerCommand("vsce-script.command-quickpick", async (setting: QuickpickSetting) => {
+		const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
+			...originalSetting,
+			description: `$(gear)command:${originalSetting.command}`,
+		}));
+		const selected = await vscode.window.showQuickPick(items, {
+			title: setting.title,
+			matchOnDescription: true
+		});
+		if (!selected) return;
+		await vscode.commands.executeCommand(selected.command!, selected.args!);
+	});
+
+	registerCommand("vsce-script.setupExtensionProject", async (args) => {
+		const { extension_id, vsix_path, dir_path } = args;
+		const cd = `cd ${dir_path};`;
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension ${extension_id}`;
+		const install_latest_extension = `code --install-extension ${vsix_path}`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
+
+	registerCommand("vsce-script.setupVimProject", async () => {
+		const cd = `cd $HOME/Desktop/coding/coreapp/vscode-extension/Vim;`;
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension vscodevim.vim-fork`;
+		const install_latest_extension = `code --install-extension /Users/tsaiwayne/Desktop/coding/coreapp/vscode-extension/Vim/vim-fork-1.21.5.vsix`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
+
+	registerCommand("vsce-script.setupVsceScriptProject", async () => {
+		const projectPath = `/Users/tsaiwayne/Desktop/code/vscode-extensions/vsce-script-preview`;
+		const extensionId = `waynetsai.vsce-script`;
+
+		const cd = `cd ${projectPath};`;
+		const vscePackage = ` yes | vsce package`;
+		const uninstall_extension = `code --uninstall-extension ${extensionId}`;
+		const install_latest_extension = `code --install-extension ${projectPath}/vsce-script-${packageJson.version}.vsix`;
+		const reload_window = `workbench.action.reloadWindow`;
+		await invokeCommands([
+			execShell(`${cd}${vscePackage}`),
+			execShell(uninstall_extension),
+			execShell(install_latest_extension),
+			execCmd(reload_window)
+		]);
+		logger.show();
+	});
 
 }
 
