@@ -49,7 +49,6 @@ export function insertSnippet(snippet: string) {
 	});
 }
 
-
 /**
  * Exec a shell command
  */
@@ -67,6 +66,41 @@ export function execShell(cmd: string) {
 				}
 				logger.info(stdout.toString());
 				resolve(stdout);
+			});
+		});
+	});
+}
+
+/**
+ * Spawn a shell command with progress and logs
+ */
+export function spawnShell(cmd: string, args: string[] = [], option: cp.SpawnOptions = {}) {
+	return () => vsc.window.withProgress({ location: vsc.ProgressLocation.Notification }, async (progress) => {
+		progress.report({
+			message: `Execute shell command: ${cmd}...`,
+		});
+		await new Promise((resolve, reject) => {
+			const proc = cp.spawn(cmd, args, option);
+
+			logger.info(`\n$ ${cmd} ${args.join(' ')}\n`);
+			logger.info(`Spawn option: ${JSON.stringify(option)}`);
+
+			proc.stdout?.on('data', (data) => {
+				logger.info(data.toString());
+			});
+
+			proc.stderr?.on('data', (data) => {
+				logger.error(data.toString());
+			});
+
+			proc.on('close', (code) => {
+				logger.info(`> ${cmd} exited with code ${code?.toString()}`);
+				resolve(null);
+			});
+
+			proc.on('error', (err) => {
+				logger.info(`> ${cmd} exited with error ${err.toString()}`);
+				reject(err);
 			});
 		});
 	});
