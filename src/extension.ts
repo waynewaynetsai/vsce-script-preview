@@ -1,23 +1,21 @@
 import * as vscode from 'vscode';
 import * as packageJson from '../package.json';
-import * as path from 'path';
-import * as fs from 'fs';
-import { commandRegisterFactory, execCmd, execShell, invokeCommands, runMacro, type, typeKeys } from './command';
-import { copyProjectTemplate, getCurrentLine, getCursorPosition, getFirstCharOnLine, getSelectedText, openProject, setCursorPosition, switchToInsertModeSelection } from './editor';
-import { confirm, dropdown, input } from './interactive';
+import { commandRegisterFactory, execCmd, execShell, invokeCommands, runMacro } from './command';
 import { ScriptLoader } from './loader';
 import { logger } from './logger';
 import { Library } from './library';
+import { CommandRegistry } from './registry';
 
 const reloadEmitter = new vscode.EventEmitter();
 
 export function activate(context: vscode.ExtensionContext) {
 	try {
-		const lib = new Library(context).getLatestLib(context);
+		const registry = new CommandRegistry(context);
+		const lib = new Library(context, registry).getLatestLib(context);
 		const userScript = ScriptLoader.instantiate(context, lib);
 		context.subscriptions.push(
 			vscode.workspace.onDidChangeConfiguration((e) => {
-				const configId = 'vsce-script.scriptPath';
+				const configId = 'vsce-script.projectPath';
 				if (e.affectsConfiguration(configId)) {
 					vscode.window.showInformationMessage(`change workspace configuration ${vscode.workspace.getConfiguration(configId)}`);
 					userScript.load(context);
@@ -29,7 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
 		reloadEmitter.event(_ => registerReloalCommand(context, userScript));
 		return lib;
 	} catch (error) {
-		console.error('catched', error);
+		const msg = 'Unexpected Vsce-Script Error';
+		console.error(msg, error);
+		vscode.window.showErrorMessage(`${msg}: ${JSON.stringify(error)}`);
 	}
 }
 
@@ -47,143 +47,7 @@ export function deactivate() { }
 
 function registerAllCommands(context: vscode.ExtensionContext) {
 
-	const [registerCommand, registerTextEditorCommand] = commandRegisterFactory(context);
-
-	// Dirty function for userflow but works, Take it easy!
-	registerCommand('vsce-script.createScriptProject', async () => {
-		// STEP0: if there is defined project or given path, check whether override original project path config or not?
-		const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
-		if (existProjectPath) {
-			const projectName = path.basename(existProjectPath);
-			const ok = await confirm(`You have an exist script project (${projectName}), Open this project?`);
-			if (ok) {
-				const newWindow = await confirm('Open project in new window?');
-				await openProject(existProjectPath, { newWindow });
-				return;
-			}
-		}
-		// STEP1: ask typescript or javascript
-		const projectType: string | undefined = await dropdown('Create Typescript or Javascript script project?', [
-			'javascript',
-			'typescript'
-		], 'typescript');
-		if (!projectType) return;
-		// STEP2: select folder
-		const projectUris = await vscode.window.showOpenDialog({
-			title: 'Select a folder to create extension project',
-			openLabel: 'Create Project',
-			canSelectFolders: true,
-			canSelectFiles: false
-		});
-		if (!projectUris) return;
-		if (!projectUris?.[0]) return;
-		const projectName = await input('Input your project name', 'vsce-script-project');
-		if (projectName) return;
-		const projectPath = path.join(projectUris?.[0].fsPath, projectName);
-		console.log(projectUris);
-		const isProjectExist = fs.existsSync(projectPath);
-		if (isProjectExist) {
-			const reuseProject = await confirm('Project is exist, Open this project?');
-			if (reuseProject) {
-				await invokeCommands([openProject(projectPath)]);
-				return;
-			}
-		}
-		// STEP3: generate project template/copy file or folder
-		try {
-			const projectTemplatePath = path.resolve(__dirname, `../template/${projectType}`);
-			await copyProjectTemplate(projectTemplatePath, projectPath, { overwrite: false });
-		} catch (err) {
-			logger.error(`Fail to create script project: ${JSON.stringify(err)}`);
-			vscode.window.showErrorMessage(`Fail to create script project: ${JSON.stringify(err)}`);
-		}
-		const useNpm = await dropdown('Use yarn or npm ?', ['yarn', 'npm'], 'npm') === 'npm';
-		invokeCommands([
-			// STEP4: install project deps
-			useNpm ? execShell(`npm`, ['install'], { cwd: projectPath }) : execShell(`yarn`, [], { cwd: projectPath }),
-			// STEP5: open project folder
-			openProject(projectPath, { newWindow: true })
-		]);
-	});
-
-	registerCommand('vsce-script.openProject', async () => {
-		const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
-		if (existProjectPath) {
-			const newWindow = await confirm('Open project in new window?');
-			await openProject(existProjectPath, { newWindow });
-		} else {
-			vscode.window.showInformationMessage('No project found! Please create a project first!');
-		}
-	});
-
-	registerCommand('vsce-script.showAllCommands', () => {
-
-	});
-
-	registerCommand('vsce-script.insertDeclaration', (args) => {
-		const activeTextEditor = vscode.window.activeTextEditor;
-		if (!activeTextEditor) return;
-		try {
-			const { inserting, replacing, type } = args;
-			activeTextEditor.edit(editBuilder => {
-				const replacingStart = new vscode.Position(replacing.start.line, replacing.start.character);
-				const replacingEnd = new vscode.Position(replacing.end.line, replacing.end.character + type.length + 1);
-				editBuilder.replace(new vscode.Range(replacingStart, replacingEnd), ';');
-			}).then(_ => {
-				activeTextEditor.insertSnippet(
-					new vscode.SnippetString(type + " ${1:newLocal} = "),
-					new vscode.Position(inserting.line, inserting.character)
-				);
-			});
-		} catch (error) {
-			console.error(error);
-		}
-	});
-
-	registerCommand("vsce-script.testCmd", () => {
-		vscode.window.showInformationMessage("script commands");
-	});
-
-	registerTextEditorCommand('vsce-script.addBracket', (editor: vscode.TextEditor) => {
-		const str = getCurrentLine(editor);
-		const lastChar = str.charAt(str.length - 1);
-		const hasWhitespace = lastChar === " ";
-		const hasClosedParen = lastChar === ')';
-		const hasOpenedParen = str.includes('(');
-		if (hasWhitespace) {
-			runMacro(["{", "}", "<left>", "\n"]);
-		} else if (!hasClosedParen && hasOpenedParen) {
-			runMacro([")", " ", "{", "}", "<left>", "\n"]);
-		} else {
-			runMacro([" ", "{", "}", "<left>", "\n"]);
-		}
-	});
-
-	registerCommand("vsce-script.surroundWith", () => {
-		invokeCommands([
-			switchToInsertModeSelection,
-			execCmd("surround.with")
-		]);
-	});
-
-	registerCommand("vsce-script.visualModeYank", () => {
-		const pos = getCursorPosition();
-		if (!pos) return;
-		runMacro(['<Esc>', 'm', 'y', 'y', '`', 'y']);
-	});
-
-	registerCommand("vsce-script.command-quickpick", async (setting: QuickpickSetting) => {
-		const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
-			...originalSetting,
-			description: `$(gear)command:${originalSetting.command}`,
-		}));
-		const selected = await vscode.window.showQuickPick(items, {
-			title: setting.title,
-			matchOnDescription: true
-		});
-		if (!selected) return;
-		await vscode.commands.executeCommand(selected.command!, selected.args!);
-	});
+	const [ registerCommand ] = commandRegisterFactory(context);
 
 	registerCommand("vsce-script.setupExtensionProject", async (args) => {
 		const { extension_id, vsix_path, dir_path } = args;
@@ -234,21 +98,8 @@ function registerAllCommands(context: vscode.ExtensionContext) {
 		logger.show();
 	});
 
+
 }
-
-interface QuickpickSetting {
-	title: string;
-	default?: string;
-	items: QuickpickCommandItem[]
-}
-
-interface QuickpickCommandItem extends vscode.QuickPickItem {
-	label: string;
-	command: string;
-	args?: any;
-}
-
-
 function runMacroDemo(context: vscode.ExtensionContext) {
 	const [registerCommand] = commandRegisterFactory(context);
 
