@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 import { ExtensionContext } from 'vscode';
 import { WorkspaceConfig } from './config';
 
@@ -54,14 +55,24 @@ export class ScriptLoader implements vscode.Disposable {
         try {
             const configPath = vscode.workspace.getConfiguration().get<string>(WorkspaceConfig.ProjectPath)!;
             if (configPath === '') {
-                vscode.window.showErrorMessage(`Should given script_path for vsce-script!`);
+                vscode.window.showErrorMessage(`Should create a project path for vsce-script!`);
                 return;
             }
-            const scriptPath = path.normalize(path.relative(__dirname, configPath));
-            const script = this.require(scriptPath);
+            const projectPath = path.normalize(path.relative(__dirname, configPath));
+            const isTsProject = fs.existsSync(path.join(projectPath, 'tsconfig.json'));
+            if (isTsProject) {
+                const hasExtensionJs = fs.existsSync(path.join(projectPath, 'extension.js'));
+                if (!hasExtensionJs) {
+                    vscode.window.showErrorMessage(`Should compile and output extension.js file for ts project!`);
+                    return;
+                }
+            }
+            const script = this.require(projectPath);
             script.activate(this.context);
         } catch (error) {
+            vscode.window.showErrorMessage('Error: ' + error);
             console.error('ScriptLoader:error', error);
+            vscode.window.showErrorMessage(JSON.stringify(error));
         }
     }
 
