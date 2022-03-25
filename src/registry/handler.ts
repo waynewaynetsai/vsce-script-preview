@@ -1,4 +1,4 @@
-import { execCmd, execShell, invokeCommands, runMacro } from "../command";
+import { execCmd, invokeCommands, runMacro, spawnShell } from "../command";
 import { copyProjectTemplate, getCurrentLine, getCursorPosition, openProject, switchToInsertModeSelection } from "../editor";
 import { confirm, dropdown, input } from "../interactive";
 import { logger } from "../logger";
@@ -11,7 +11,8 @@ import { QuickpickCommandItem, QuickpickSetting } from "../models";
 export async function createProject() {
     // STEP0: if there is defined project or given path, check whether override original project path config or not?
     const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
-    if (existProjectPath) {
+    console.log('existProjectPath', existProjectPath);
+    if (existProjectPath && existProjectPath !== '') {
         const projectName = path.basename(existProjectPath);
         const ok = await confirm(`You have an exist script project (${projectName}), Open this project?`);
         if (ok) {
@@ -32,16 +33,18 @@ export async function createProject() {
         title: 'Select a folder to create extension project',
         openLabel: 'Create Project',
         canSelectFolders: true,
-        canSelectFiles: false
+        canSelectFiles: false,
+        defaultUri: vscode.workspace.workspaceFolders?.[0].uri
     });
     if (!projectUris)
         return;
     if (!projectUris?.[0])
         return;
     const projectName = await input('Input your project name', 'vsce-script-project');
-    if (projectName)
-        return;
+    if (!projectName || projectName === '') return;
+    console.log('projectName', projectName);
     const projectPath = path.join(projectUris?.[0].fsPath, projectName);
+    console.log('projectPath', projectPath);
     const isProjectExist = fs.existsSync(projectPath);
     if (isProjectExist) {
         const reuseProject = await confirm('Project is exist, Open this project?');
@@ -49,7 +52,11 @@ export async function createProject() {
             await invokeCommands([openProject(projectPath)]);
             return;
         }
+    } else {
+        vscode.workspace.getConfiguration('vsce-script')
+            .update('projectPath', path.resolve(projectPath));
     }
+    console.log('Step3', projectPath);
     // STEP3: generate project template/copy file or folder
     try {
         const projectTemplatePath = path.resolve(__dirname, `../template/${projectType}`);
@@ -59,11 +66,12 @@ export async function createProject() {
         vscode.window.showErrorMessage(`Fail to create script project: ${JSON.stringify(err)}`);
     }
     const useNpm = await dropdown('Use yarn or npm ?', ['yarn', 'npm'], 'npm') === 'npm';
+    const newWindow = await confirm('Open project at new window?');
     invokeCommands([
         // STEP4: install project deps
-        useNpm ? execShell(`npm`, ['install'], { cwd: projectPath }) : execShell(`yarn`, [], { cwd: projectPath }),
+        useNpm ? spawnShell(`npm`, ['install'], { cwd: projectPath }) : spawnShell(`yarn`, [], { cwd: projectPath }),
         // STEP5: open project folder
-        openProject(projectPath, { newWindow: true })
+        openProject(projectPath, { newWindow })
     ]);
 }
 
@@ -71,7 +79,9 @@ export const openScriptProject = async () => {
     const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
     if (existProjectPath) {
         const newWindow = await confirm('Open project in new window?');
-        await openProject(existProjectPath, { newWindow });
+        console.log('newWindow', newWindow);
+        console.log('existProjectPath', existProjectPath);
+        await openProject(existProjectPath, { newWindow })();
     } else {
         vscode.window.showInformationMessage('No project found! Please create a project first!');
     }
