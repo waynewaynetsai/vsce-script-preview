@@ -32,8 +32,12 @@
 				"command": "vsce-script.reloadScript"
 			},
 			{
-				"title": "Create Script Project",
-				"command": "vsce-script.createScriptProject"
+				"title": "Vsce Script: Open Script Project",
+				"command": "vsce-script.openProject"
+			},
+			{
+				"title": "Vsce Script: Create Script Project",
+				"command": "vsce-script.createProject"
 			}
 		],
 		"configuration": {
