@@ -81,7 +81,7 @@ export function spawnShell(cmd: string, args: string[] = [], option: cp.SpawnOpt
 		});
 		await new Promise((resolve, reject) => {
 			const proc = cp.spawn(cmd, args, option);
-
+			logger.show();
 			logger.info(`\n$ ${cmd} ${args.join(' ')}\n`);
 			logger.info(`Spawn option: ${JSON.stringify(option)}`);
 
