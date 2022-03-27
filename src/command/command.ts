@@ -64,6 +64,7 @@ export function execShell(cmd: string) {
 					logger.error(`${err}`);
 					reject(err);
 				}
+				logger.show();
 				logger.info(stdout.toString());
 				resolve(stdout);
 			});
