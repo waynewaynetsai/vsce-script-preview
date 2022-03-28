@@ -16,7 +16,7 @@ class BuiltInCommands {
         return Object.entries(this.handlers).map(([id, handler]) => {
             return { commandId: `${this.prefix}.${id}`, handler };
         }).reduce((table, { commandId, handler }) => {
-            table[commandId] = handler;
+           table[commandId] = handler;
             return table;
         }, {});
     }
@@ -29,6 +29,7 @@ interface CommandTable {
 
 export class CommandRegistry {
     private table: CommandTable = {};
+    public lastExecutedCommand = '';
 
     private get prefix(): string  {
         return vscode.workspace.getConfiguration('vsce-script').get('commandPrefix') || 'vsce-script';
@@ -40,7 +41,10 @@ export class CommandRegistry {
 
     public registerCommand(commandId: string, handler: (...args: any) => any) {
         const [registerCommand] = commandRegisterFactory(this.context);
-        this.table[commandId] = handler;
+        this.table[commandId] = async () => {
+           this.lastExecutedCommand = commandId;
+           return await handler();
+        };
         registerCommand(commandId, handler);
     }
 
