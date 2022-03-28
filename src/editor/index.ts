@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+
+export * from './utils';
+
 import { typeCommands, invokeCommands } from "../command";
 
 export function getCurrentLine(editor: vscode.TextEditor): string {
@@ -7,16 +10,14 @@ export function getCurrentLine(editor: vscode.TextEditor): string {
 
 export function getCursorPosition(): vscode.Position | undefined {
 	const editor = vscode.window.activeTextEditor;
-	if (!editor)
-		return;
+	if (!editor) return;
 	return editor.selection.active;
 }
 
 export function setCursorPosition(pos: vscode.Position): () => Promise<any> {
 	return () => new Promise((resolve, _reject) => {
 		const editor = vscode.window.activeTextEditor;
-		if (!editor)
-			return;
+		if (!editor) return;
 		setTimeout(() => {
 			const endPos = new vscode.Position(pos.line, pos.character - 1);
 			const selection = new vscode.Selection(endPos, endPos);
@@ -40,7 +41,7 @@ export function switchToInsertModeSelection(): Promise<void> {
 				sel.start.character,
 				sel.end.line,
 				sel.end.character
-			))
+			));
 			resolve();
 		}, 0);
 	});
