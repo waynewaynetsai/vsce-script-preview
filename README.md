@@ -14,6 +14,33 @@ Since vsce-script is an extension playground, you can fastly implement your idea
 
 ### Why we neeed this extension? What problem does it solve?
 
+- Case Study: Select a function block  
+
+We need to select a function or json block, thus we create a macro to make this operation easier.
+
+At VSCodeVim's `.vimrc`, we define a custom keybindings `vak` for select
+
+```
+xmap ak <Esc>[{V$%$h
+```
+
+It's hard to read and understand.
+
+With Js, we can write macro like below example:
+
+```
+```
+
+Image (select a block)
+
+
+This macro can't handle all situation, if we are in a json file, and we want to select a block.
+
+- Limit 1: Can not rerun
+- Limit 2: Can not handle all situation, such as `[`
+
+if we 
+
 - Easily integrate it with VS Code's bulti-in command and third party extension's command
 
 - Reusable macro with better readability 
