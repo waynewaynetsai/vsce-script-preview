@@ -100,36 +100,3 @@ function registerAllCommands(context: vscode.ExtensionContext) {
 
 
 }
-function runMacroDemo(context: vscode.ExtensionContext) {
-	const [registerCommand] = commandRegisterFactory(context);
-
-	const searchWord = (word: string) => ["/", `${word}`, "\n"];
-	const goTop = ["g", "g"];
-	const deleteCurrentLine = ["d", "d"];
-
-	const removeComponent = (tagName: string) => [
-		"<Esc>",
-		...goTop,
-		...searchWord(tagName),
-		...deleteCurrentLine,
-		...searchWord(tagName),
-		...deleteCurrentLine
-	];
-
-	registerCommand("vsce-script.runMacro", async (name: string) => {
-		switch (name) {
-			case 'RemoveChildComponent':
-				const tagName = await vscode.window.showInputBox({
-					title: 'Delete component import and html tag',
-					placeHolder: 'enter your full component tag name'
-				});
-				if (tagName) {
-					const dynamicMacro = removeComponent(tagName);
-					runMacro(dynamicMacro);
-				}
-				break;
-			default:
-				break;
-		}
-	});
-}
