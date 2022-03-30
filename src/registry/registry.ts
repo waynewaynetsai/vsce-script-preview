@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { commandRegisterFactory } from "../command";
+import { logger } from '../logger';
 import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, showAllCommands, surroundWith, visualModeYank } from './handler';
 
 class BuiltInCommands {
@@ -52,7 +53,7 @@ export class CommandRegistry {
         const [registerCommand] = commandRegisterFactory(this.context);
         this.table = this.createCommandTable();
         Object.entries(this.table).forEach(([cmd, fn]) => {
-            console.log('registerCommand', cmd);
+            logger.info(`registerCommand: ${cmd}`);
             return registerCommand(cmd, fn);
         });
     }
