@@ -29,7 +29,7 @@ interface CommandTable {
 
 export class CommandRegistry {
     private table: CommandTable = {};
-    public lastExecutedCommand = '';
+    public lastExecutedCommand: { command: string; args: any } | undefined = undefined;
 
     private get prefix(): string  {
         return vscode.workspace.getConfiguration('vsce-script').get('commandPrefix') || 'vsce-script';
@@ -41,9 +41,9 @@ export class CommandRegistry {
 
     public registerCommand(commandId: string, handler: (...args: any) => any) {
         const [registerCommand] = commandRegisterFactory(this.context);
-        this.table[commandId] = async () => {
-           this.lastExecutedCommand = commandId;
-           return await handler();
+        this.table[commandId] = async (...args: any[]) => {
+           this.lastExecutedCommand = { command: commandId, args: args?.[0] };
+           return await handler(...args);
         };
         registerCommand(commandId, handler);
     }
