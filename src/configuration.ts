@@ -1,6 +1,8 @@
+import { provide } from 'injection';
 import * as vscode from 'vscode';
 import { Global } from './global';
 
+@provide()
 export class Configuration {
 
     public commandPrefix = 'vsce-script';
