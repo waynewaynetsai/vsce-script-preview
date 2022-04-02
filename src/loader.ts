@@ -3,6 +3,9 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { ExtensionContext } from 'vscode';
 import { WorkspaceConfig } from './config';
+import { init, inject, provide } from 'injection';
+import { Library } from './library';
+import { Instance } from './instance';
 
 const vscodeApi: typeof vscode = require('vscode');
 
@@ -15,33 +18,28 @@ interface VsceScriptModule {
     deactivate(): void;
 }
 
+@provide()
 export class ScriptLoader implements vscode.Disposable {
+
+    @inject(Instance.Library)
+    private lib: Library;
+
+    @inject(Instance.ExtensionContext)
+    private context: vscode.ExtensionContext;
 
     public cacheScript!: VsceScriptModule;
 
-    private static _instance: ScriptLoader;
-
-    static instantiate(context: vscode.ExtensionContext, lib) {
-       const instance = new ScriptLoader(context);
-       instance.injectGlobalDependencies(lib); 
-       instance.load(context);
-       context.subscriptions.push(instance);
-       ScriptLoader._instance = instance; 
-       return instance;
+    @init()
+    public init() {
+       this.injectGlobalDependencies(); 
+       this.load();
+       this.context.subscriptions.push(this);
+       return Promise.resolve();
     }
 
-    static getInstance(context: vscode.ExtensionContext, lib) {
-       if (!ScriptLoader._instance) {
-           ScriptLoader.instantiate(context, lib); 
-       }
-       return this._instance = ScriptLoader._instance; 
-    }
-
-    constructor(private context: ExtensionContext) {} 
-    
-    public injectGlobalDependencies(lib) {
+    public injectGlobalDependencies() {
         global.vscode = vscodeApi;
-        global.lib = lib;
+        global.lib = this.lib;
     }
 
     private require(scriptPath: string) {
@@ -51,7 +49,7 @@ export class ScriptLoader implements vscode.Disposable {
         return this.cacheScript;
     }
 
-    public load(_context: ExtensionContext) {
+    public load() {
         try {
             const configPath = vscode.workspace.getConfiguration().get<string>(WorkspaceConfig.ProjectPath)!;
             if (configPath === '') {
