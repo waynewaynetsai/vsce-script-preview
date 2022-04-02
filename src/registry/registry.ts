@@ -1,5 +1,7 @@
+import { inject, provide } from 'injection';
 import * as vscode from 'vscode';
 import { commandRegisterFactory } from "../command";
+import { Instance } from '../instance';
 import { logger } from '../logger';
 import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, showAllCommands, surroundWith, visualModeYank } from './handler';
 
@@ -28,25 +30,22 @@ interface CommandTable {
     [key: string]: (...args: any) => any;
 };
 
+@provide()
 export class CommandRegistry {
+
+    @inject(Instance.ExtensionContext)
+    private context: vscode.ExtensionContext;
+    
     private table: CommandTable = {};
+
     public lastExecutedCommand: { command: string; args: any } | undefined = undefined;
 
     private get prefix(): string  {
         return vscode.workspace.getConfiguration('vsce-script').get('commandPrefix') || 'vsce-script';
     }
 
-    constructor(private context: vscode.ExtensionContext) { 
+    constructor() { 
         this.init();
-    }
-
-    public registerCommand(commandId: string, handler: (...args: any) => any) {
-        const [registerCommand] = commandRegisterFactory(this.context);
-        this.table[commandId] = async (...args: any[]) => {
-           this.lastExecutedCommand = { command: commandId, args: args?.[0] };
-           return await handler(...args);
-        };
-        registerCommand(commandId, handler);
     }
 
     private init() {
@@ -56,6 +55,15 @@ export class CommandRegistry {
             logger.info(`registerCommand: ${cmd}`);
             return registerCommand(cmd, fn);
         });
+    }
+
+    public registerCommand(commandId: string, handler: (...args: any) => any) {
+        const [registerCommand] = commandRegisterFactory(this.context);
+        this.table[commandId] = async (...args: any[]) => {
+           this.lastExecutedCommand = { command: commandId, args: args?.[0] };
+           return await handler(...args);
+        };
+        registerCommand(commandId, handler);
     }
 
     private createCommandTable(): CommandTable {
