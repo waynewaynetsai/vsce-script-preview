@@ -12,7 +12,7 @@ export class Library {
     @inject(Instance.ExtensionContext)
     public context: vscode.ExtensionContext;
 
-    @inject()
+    @inject(Instance.CommandRegistry)
     private registry: CommandRegistry;
 
     public version: string = packageJSON.version;
@@ -25,7 +25,7 @@ export class Library {
                 runMacro,
                 type
             },
-            commands: {
+            command: {
                 registerCommand: (commandId: string, handler: (...args) => any) => this.registry.registerCommand(commandId, handler),
                 invokeCommands,
                 execShell,
