@@ -10,6 +10,9 @@
     "esModuleInterop": true,
     /* Additional Checks */
     "noImplicitAny": false,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     // "checkJs": true,
     "typeRoots": ["src/typings/typing.d.ts"]
     // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */

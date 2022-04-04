@@ -6,6 +6,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import { QuickpickCommandItem, QuickpickSetting } from "../models";
+import { Instantiator } from "../instantiator";
+import { CommandRegistry } from "./registry";
 
 // Dirty code here, take it easy!
 export async function createProject() {
@@ -135,6 +137,15 @@ export const visualModeYank = async () => {
     await runMacro(['<Esc>', 'm', 'y', 'y', '`', 'y']);
 };
 
+export const rerunLastCommand = async () => { 
+    const commandRegistry = Instantiator.container.get<CommandRegistry>(CommandRegistry);
+    const lastCommandInfo = commandRegistry.lastExecutedCommand;
+    if (lastCommandInfo) {
+        await vscode.commands.executeCommand(lastCommandInfo.command, lastCommandInfo.args);
+    } else {
+        vscode.window.showErrorMessage('Has no last command!');
+    }
+};
 
 export const showAllCommands = (table: { [key: string]: any }) => async () => {
     const commandId = await dropdown('Show all commands', Object.keys(table), '');
