@@ -22,6 +22,7 @@ export class Instantiator {
       ScriptLoader,
       Library,
       CommandRegistry,
+      Configuration
     ];
     const container = await this.setupIocContainer(context, ctors);
     Instantiator.container = container;

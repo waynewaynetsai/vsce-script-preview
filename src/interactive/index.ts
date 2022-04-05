@@ -15,7 +15,7 @@ export const input = async (prompt: string, placeHolder: string, options: vscode
     ...options
 })) || '';
 
-export const confirm = async (title: string, placeHolder: 'Yes' | 'No' = 'No', options: vscode.QuickPickOptions = {}) => await vscode.window.showQuickPick(['Yes', 'No'], {
+export const confirm = async (title: string, placeHolder: 'Yes' | 'No' = 'Yes', options: vscode.QuickPickOptions = {}) => await vscode.window.showQuickPick(['Yes', 'No'], {
     title,
     canPickMany: false,
     placeHolder,
