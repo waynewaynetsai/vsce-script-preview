@@ -1,4 +1,4 @@
-import { inject, provide } from 'injection';
+import { init, inject, provide, scope, ScopeEnum } from 'injection';
 import * as vscode from 'vscode';
 import { commandRegisterFactory } from "../command";
 import { Instance } from '../instance';
@@ -31,6 +31,7 @@ interface CommandTable {
 };
 
 @provide()
+@scope(ScopeEnum.Singleton)
 export class CommandRegistry {
 
     @inject(Instance.ExtensionContext)
@@ -44,17 +45,15 @@ export class CommandRegistry {
         return vscode.workspace.getConfiguration('vsce-script').get('commandPrefix') || 'vsce-script';
     }
 
-    constructor() { 
-        this.init();
-    }
-
-    private init() {
-        const [registerCommand] = commandRegisterFactory(this.context);
+    @init()
+    public async init() {
         this.table = this.createCommandTable();
         Object.entries(this.table).forEach(([cmd, fn]) => {
             logger.info(`registerCommand: ${cmd}`);
-            return registerCommand(cmd, fn);
+            return this.registerCommand(cmd, fn);
         });
+        this.registerCommand('vsce-script.showAllCommands', showAllCommands(this.table));
+        await Promise.resolve();
     }
 
     public registerCommand(commandId: string, handler: (...args: any) => any) {
