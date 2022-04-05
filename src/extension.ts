@@ -1,31 +1,38 @@
+import 'reflect-metadata';
+
 import * as vscode from 'vscode';
 import * as packageJson from '../package.json';
-import { commandRegisterFactory, execCmd, execShell, invokeCommands, runMacro } from './command';
+import * as path from 'path';
+import { commandRegisterFactory, execCmd, execShell, invokeCommands, spawnShell } from './command';
 import { ScriptLoader } from './loader';
 import { logger } from './logger';
 import { Library } from './library';
-import { CommandRegistry } from './registry';
+import { Instantiator } from './instantiator';
+import { isTsProject } from './registry';
+import { confirm } from './interactive';
 
 const reloadEmitter = new vscode.EventEmitter();
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	try {
-		const registry = new CommandRegistry(context);
-		const lib = new Library(context, registry).getLatestLib(context);
-		const userScript = ScriptLoader.instantiate(context, lib);
+		console.log('startup');
+		await Instantiator.startup(context);
+		console.log('startup_end');
+		const container = Instantiator.container;
+		const userScript = await container.getAsync<ScriptLoader>(ScriptLoader);
 		context.subscriptions.push(
 			vscode.workspace.onDidChangeConfiguration((e) => {
 				const configId = 'vsce-script.projectPath';
 				if (e.affectsConfiguration(configId)) {
 					vscode.window.showInformationMessage(`change workspace configuration ${vscode.workspace.getConfiguration(configId)}`);
-					userScript.load(context);
+					userScript.load();
 				}
 			})
 		);
 		registerAllCommands(context);
 		registerReloalCommand(context, userScript);
 		reloadEmitter.event(_ => registerReloalCommand(context, userScript));
-		return lib;
+		return await (await container.getAsync<Library>(Library)).getLatestLib(context);
 	} catch (error) {
 		const msg = 'Unexpected Vsce-Script Error';
 		console.error(msg, error);
@@ -35,9 +42,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 function registerReloalCommand(context: vscode.ExtensionContext, scriptLoader: ScriptLoader) {
 	const [registerCommand] = commandRegisterFactory(context);
-	registerCommand('vsce-script.reloadScript', () => {
+	registerCommand('vsce-script.reloadScript', async () => {
+		const isTypescript = isTsProject();
+		if (isTypescript) {
+			const compileProject = await confirm('Compile Typescript Project ?');
+			const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
+			if (compileProject) {
+				await spawnShell('npm', ['run', 'compile'], { cwd: existProjectPath})();	
+			}
+		}
 		context.subscriptions.forEach(d => d.dispose());
-		scriptLoader.load(context);
+		scriptLoader.load();
 		registerAllCommands(context);
 		reloadEmitter.fire(null);
 	});
@@ -47,7 +62,7 @@ export function deactivate() { }
 
 function registerAllCommands(context: vscode.ExtensionContext) {
 
-	const [ registerCommand ] = commandRegisterFactory(context);
+	const [registerCommand] = commandRegisterFactory(context);
 
 	registerCommand("vsce-script.setupExtensionProject", async (args) => {
 		const { extension_id, vsix_path, dir_path } = args;
