@@ -1,11 +1,27 @@
 import * as vsc from 'vscode';
 import { Position } from "vscode";
 import * as path from 'path';
-import { execShell, spawnShell } from '../command';
+import { spawnShell } from '../command';
 import { logger } from '../logger';
 
 function clamp(num: number, min: number, max: number) {
     return Math.min(Math.max(num, min), max);
+}
+
+export function getCurrentLine(editor: vsc.TextEditor): string {
+	return editor.document.lineAt(editor.selection.active.line).text;
+}
+
+export function getLine(lineNumber: number) {
+    const editor = vsc.window.activeTextEditor;
+    if (!editor) return;
+    return editor.document.lineAt(lineNumber).text;
+}
+
+export function getCursorPosition(): vsc.Position | undefined {
+	const editor = vsc.window.activeTextEditor;
+	if (!editor) return;
+	return editor.selection.active;
 }
 
 export function getFirstCharOnLine(
@@ -71,5 +87,5 @@ export function openProject(fsPath: string, option?: {
 }
 
 export function copyProjectTemplate(source: string, target: string, option: { overwrite: boolean } = { overwrite: false }) {
-   return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option); 
+    return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option);
 }
