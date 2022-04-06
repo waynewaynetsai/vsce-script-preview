@@ -17,8 +17,8 @@ export function commandRegisterFactory(context: vsc.ExtensionContext) {
 }
 
 export function completionRegisterFactory(context: vsc.ExtensionContext) {
-	const registerCompletionItemProvider = (selector: vsc.DocumentSelector, completionItemProvider: vsc.CompletionItemProvider, triggerCharacters = []) => {
-		const subscription = vsc.languages.registerCompletionItemProvider(selector, completionItemProvider);
+	const registerCompletionItemProvider = (selector: vsc.DocumentSelector, completionItemProvider: vsc.CompletionItemProvider, ...triggerCommitCharacters: string[]) => {
+		const subscription = vsc.languages.registerCompletionItemProvider(selector, completionItemProvider, ...triggerCommitCharacters);
 		context.subscriptions.push(subscription);
 	};
 	return registerCompletionItemProvider;
