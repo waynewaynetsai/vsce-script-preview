@@ -1,11 +1,27 @@
 import * as vsc from 'vscode';
 import { Position } from "vscode";
 import * as path from 'path';
-import { execShell, spawnShell } from '../command';
+import { spawnShell } from '../command';
 import { logger } from '../logger';
 
 function clamp(num: number, min: number, max: number) {
     return Math.min(Math.max(num, min), max);
+}
+
+export function getCurrentLine(editor: vsc.TextEditor): string {
+    return editor.document.lineAt(editor.selection.active.line).text;
+}
+
+export function getLine(lineNumber: number) {
+    const editor = vsc.window.activeTextEditor;
+    if (!editor) return;
+    return editor.document.lineAt(lineNumber).text;
+}
+
+export function getCursorPosition(): vsc.Position | undefined {
+    const editor = vsc.window.activeTextEditor;
+    if (!editor) return;
+    return editor.selection.active;
 }
 
 export function getFirstCharOnLine(
@@ -19,6 +35,37 @@ export function getFirstCharOnLine(
 export function getCharAt(document: vsc.TextDocument, position: Position): string {
     const pos = document.validatePosition(position);
     return document.lineAt(pos).text[pos.character];
+}
+
+/**
+ * Find specific character backward from current cursor position
+ */
+export function findFirstOccurCharAtLine(chars: string[], line: number, start: number): string | undefined {
+    const lineText = getLine(line);
+    for (let i = start - 1; i >= 1; i--) {
+        if (chars.includes(lineText?.[i] ?? '')) {
+            return lineText?.[i];
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Find specific character backward from current cursor position
+ */
+export function findFirstOccurCharAtDocument(chars: string[]): string | undefined {
+    const pos = getCursorPosition();
+    if (!pos) return;
+    let char = findFirstOccurCharAtLine(chars, pos.line, pos.character);
+    let line = pos.line - 1;
+    while (!char && line > 1) {
+        const lineLength = getLine(line)?.length;
+        if (lineLength) {
+            char = findFirstOccurCharAtLine(chars, line, lineLength);
+        }
+        line--;
+    }
+    return char;
 }
 
 export function getCharUnderCursor() {
@@ -71,5 +118,5 @@ export function openProject(fsPath: string, option?: {
 }
 
 export function copyProjectTemplate(source: string, target: string, option: { overwrite: boolean } = { overwrite: false }) {
-   return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option); 
+    return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option);
 }

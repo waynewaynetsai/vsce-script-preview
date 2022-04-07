@@ -19,20 +19,21 @@ export async function activate(context: vscode.ExtensionContext) {
 		await Instantiator.startup(context);
 		console.log('startup_end');
 		const container = Instantiator.container;
-		const userScript = await container.getAsync<ScriptLoader>(ScriptLoader);
+		const library = await Instantiator.container.getAsync<Library>(Library);
 		context.subscriptions.push(
-			vscode.workspace.onDidChangeConfiguration((e) => {
+			vscode.workspace.onDidChangeConfiguration(async (e) => {
 				const configId = 'vsce-script.projectPath';
 				if (e.affectsConfiguration(configId)) {
 					vscode.window.showInformationMessage(`change workspace configuration ${vscode.workspace.getConfiguration(configId)}`);
+					const userScript = await container.getAsync<ScriptLoader>(ScriptLoader);
 					userScript.load();
 				}
 			})
 		);
 		registerAllCommands(context);
-		registerReloalCommand(context, userScript);
-		reloadEmitter.event(_ => registerReloalCommand(context, userScript));
-		return await (await container.getAsync<Library>(Library)).getLatestLib(context);
+		registerReloalCommand(context);
+		reloadEmitter.event(_ => registerReloalCommand(context));
+		return library.getLatestLib(context);
 	} catch (error) {
 		const msg = 'Unexpected Vsce-Script Error';
 		console.error(msg, error);
@@ -40,7 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	}
 }
 
-function registerReloalCommand(context: vscode.ExtensionContext, scriptLoader: ScriptLoader) {
+function registerReloalCommand(context: vscode.ExtensionContext) {
 	const [registerCommand] = commandRegisterFactory(context);
 	registerCommand('vsce-script.reloadScript', async () => {
 		const isTypescript = isTsProject();
@@ -52,7 +53,8 @@ function registerReloalCommand(context: vscode.ExtensionContext, scriptLoader: S
 			}
 		}
 		context.subscriptions.forEach(d => d.dispose());
-		scriptLoader.load();
+		const userScript = await Instantiator.container.getAsync<ScriptLoader>(ScriptLoader);
+		userScript.load();
 		registerAllCommands(context);
 		reloadEmitter.fire(null);
 	});
