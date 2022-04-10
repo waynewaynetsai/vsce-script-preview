@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { getCharUnderCursor } from "../editor";
 import { CommandFactory, TypeCommand } from "../models";
 
 export const makeTypeCommand = (input: string): TypeCommand => {
@@ -34,3 +35,9 @@ export function typeCommands(texts: string[]): (() => Thenable<void>)[] {
 
 export const runMacro = (cmds: string[]) => invokeCommands(typeCommands(cmds));
 
+export const typeCharUnderCursor = () =>  {
+    const char = getCharUnderCursor();
+    // TODO: add log for undefined char
+    if (!char) return;
+    return type(char);
+};

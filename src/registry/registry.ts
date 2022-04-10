@@ -3,25 +3,40 @@ import * as vscode from 'vscode';
 import { commandRegisterFactory } from "../command";
 import { Instance } from '../instance';
 import { logger } from '../logger';
-import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, showAllCommands, surroundWith, visualModeYank } from './handler';
+import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, rerunLastCommand, showAllCommands, surroundWith, visualModeYank } from './handler';
 
 class BuiltInCommands {
-    private handlers = {
+    private builtInCommands= {
         openProject: openScriptProject, 
         createProject, 
+        rerunLastCommand,
+    };
+
+    private customCommands = {
         insertDeclaration,  
         addBracket,  
         surroundWith,  
         visualModeYank,  
         commandQuickpick, 
     };
+
+    private commands = {
+        ...this.builtInCommands,
+        ...this.customCommands    
+    };
+
     public get commandTable() {
-        return Object.entries(this.handlers).map(([id, handler]) => {
+        const table = Object.entries(this.commands).map(([id, handler]) => {
             return { commandId: `${this.prefix}.${id}`, handler };
         }).reduce((table, { commandId, handler }) => {
            table[commandId] = handler;
             return table;
         }, {});
+        const showAllCommandsId = `${this.prefix}.showAllCommands`;
+        return {
+            ...table,
+            [showAllCommandsId]: showAllCommands(table),
+        };
     }
     constructor(private prefix: string) { }
 }
@@ -47,12 +62,11 @@ export class CommandRegistry {
 
     @init()
     public async init() {
-        this.table = this.createCommandTable();
+        this.table = new BuiltInCommands(this.prefix).commandTable;
         Object.entries(this.table).forEach(([cmd, fn]) => {
             logger.info(`registerCommand: ${cmd}`);
             return this.registerCommand(cmd, fn);
         });
-        this.registerCommand('vsce-script.showAllCommands', showAllCommands(this.table));
         await Promise.resolve();
     }
 
@@ -63,13 +77,5 @@ export class CommandRegistry {
            return await handler(...args);
         };
         registerCommand(commandId, handler);
-    }
-
-    private createCommandTable(): CommandTable {
-        const table = new BuiltInCommands(this.prefix).commandTable;
-        return {
-            ...table,
-            showAllCommands: showAllCommands(table),
-        };
     }
 }
