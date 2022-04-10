@@ -137,7 +137,7 @@ export const visualModeYank = async () => {
     await runMacro(['<Esc>', 'm', 'y', 'y', '`', 'y']);
 };
 
-export const rerunLastCommand = async () => { 
+export const rerunLastCommand = async () => {
     const commandRegistry = Instantiator.container.get<CommandRegistry>(CommandRegistry);
     const lastCommandInfo = commandRegistry.lastExecutedCommand;
     if (lastCommandInfo) {
@@ -150,10 +150,7 @@ export const rerunLastCommand = async () => {
 export const showAllCommands = (table: { [key: string]: any }) => async () => {
     const commandId = await dropdown('Show all commands', Object.keys(table), '');
     if (commandId && commandId !== '') {
-        const handler = table[commandId];
-        if (handler) {
-            await vscode.commands.executeCommand(handler);
-        }
+        await vscode.commands.executeCommand(commandId);
     }
 };
 
