@@ -15,9 +15,7 @@ const reloadEmitter = new vscode.EventEmitter();
 
 export async function activate(context: vscode.ExtensionContext) {
 	try {
-		console.log('startup');
 		await Instantiator.startup(context);
-		console.log('startup_end');
 		const container = Instantiator.container;
 		const library = await Instantiator.container.getAsync<Library>(Library);
 		context.subscriptions.push(
