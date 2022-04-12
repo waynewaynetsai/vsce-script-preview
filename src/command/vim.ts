@@ -38,6 +38,10 @@ export const runMacro = (cmds: string[]) => invokeCommands(typeCommands(cmds));
 export const typeCharUnderCursor = () =>  {
     const char = getCharUnderCursor();
     // TODO: add log for undefined char
-    if (!char) return () => undefined;
+    if (!char) {
+        const errorMessage = 'No char under cursor!';
+        vscode.window.showErrorMessage(errorMessage);
+        throw new Error(errorMessage);
+    }
     return type(char);
 };
