@@ -38,6 +38,6 @@ export const runMacro = (cmds: string[]) => invokeCommands(typeCommands(cmds));
 export const typeCharUnderCursor = () =>  {
     const char = getCharUnderCursor();
     // TODO: add log for undefined char
-    if (!char) return;
+    if (!char) return () => undefined;
     return type(char);
 };
