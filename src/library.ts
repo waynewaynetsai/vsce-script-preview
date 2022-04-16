@@ -2,10 +2,10 @@ import { SpawnOptions } from 'child_process';
 import { inject, provide } from 'injection';
 import * as vscode from 'vscode';
 import * as packageJSON from '../package.json';
-import { completionRegisterFactory, execCmd, execShell, invokeCommands, runMacro, spawnShell, type, typeKeys } from './command';
-import { createNewFile, createNewFolder, findFirstOccurCharAtDocument, findFirstOccurCharAtLine, getCharAt, getCharUnderCursor, getCurrentLine, getCursorPosition, getFirstCharOnLine, getLine, getSelectedText, setCursorPosition, switchToInsertModeSelection } from './editor';
-import { Instance } from './instance';
+import { completionRegisterFactory, execCmd, execShell, invokeCommands, runAutomation, runCommands, runMacro, spawnShell, type, typeCharUnderCursor, typeKeys } from './command';
+import { createNewFile, createNewFolder, findFirstOccurCharAtDocument, findFirstOccurCharAtLine, getCharAt, getCharUnderCursor, getCurrentLine, getCursorPosition, getFirstCharOnLine, getLine, getSelectedText, setCursorPosition, switchToInsertModeSelection } from './editor'; import { Instance } from './instance';
 import { confirm, dropdown, input } from './interactive';
+import { logger } from './logger';
 import { commandQuickpick } from './registry';
 import { CommandRegistry } from './registry/registry';
 
@@ -20,26 +20,32 @@ export class Library {
 
     public version: string = packageJSON.version;
 
-    getLatestLib(context: vscode.ExtensionContext) {
+    getLatestLib(context: vscode.ExtensionContext)  {
         const registerCompletionProvider = completionRegisterFactory(context);
         const lib = {
-            vim: {
-                switchToInsertModeSelection,
-                runMacro,
+            version: this.version,
+            automation: {
+                typeCharUnderCursor,
                 type,
-                typeKeys
-            },
-            command: {
-                registerCommand: (commandId: string, handler: (...args) => any) => this.registry.registerCommand(commandId, handler),
-                invokeCommands,
+                typeKeys,
+                execCmd,
                 execShell,
                 spawnShell,
-                execCmd,
+                runMacro,
+                runAutomation,
+                runCommands,
+            },
+            commands: {
+                registerCommand: (commandId: string, handler: (...args: any) => any) => this.registry.registerCommand(commandId, handler),
+                invokeCommands
             },
             promise: {
-                execShell: async (cmd: string) => execShell(cmd),
-                spawnShell: async (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args),
-                execCmd: async (payload: string | { command: string; args: object; }) => execCmd(payload) 
+                execCmd: (payload: string | { command: string; args: object; }) => execCmd(payload),
+                execShell: (cmd: string) => execShell(cmd),
+                spawnShell: (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args),
+                typeCharUnderCursor: () => typeCharUnderCursor(),
+                type: (text: string) => type(text)(),
+                typeKeys: (texts: string[]) => typeKeys(texts),
             },
             editor: {
                 registerCompletionProvider,
@@ -57,10 +63,10 @@ export class Library {
                 setCursorPosition
             },
             interactive: {
-               confirm, 
-               input,
-               dropdown,
-               commandQuickpick
+                confirm,
+                input,
+                dropdown,
+                commandQuickpick
             }
         };
         return lib;

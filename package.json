@@ -38,6 +38,10 @@
 			{
 				"title": "Vsce Script: Create Script Project",
 				"command": "vsce-script.createProject"
+			},
+			{
+				"title": "Vsce Script: Show All Commands",
+				"command": "vsce-script.showAllCommands"
 			}
 		],
 		"configuration": {
@@ -140,7 +144,8 @@
 		"ts-loader": "^9.2.5",
 		"typescript": "^4.4.4",
 		"webpack": "^5.52.1",
-		"webpack-cli": "^4.8.0"
+		"webpack-cli": "^4.8.0",
+		"xmldom": "^0.6.0"
 	},
 	"dependencies": {
 		"fs-extra": "^10.0.1",

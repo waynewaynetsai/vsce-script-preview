@@ -4,7 +4,7 @@
 const { window } = vscode;
 // Vsce-Script extension library
 const {
-    command: {
+    commands: {
         registerCommand,
     }
 } = lib;
