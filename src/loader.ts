@@ -6,6 +6,7 @@ import { WorkspaceConfig } from './config';
 import { init, inject, provide, scope, ScopeEnum } from 'injection';
 import { Library } from './library';
 import { Instance } from './instance';
+import { LibraryApi } from './typings/library';
 
 const vscodeApi: typeof vscode = require('vscode');
 
@@ -42,7 +43,7 @@ export class ScriptLoader implements vscode.Disposable {
     public injectGlobalDependencies(context: vscode.ExtensionContext) {
         global.vscode = vscodeApi;
         console.log('inject', this.lib);
-        global.lib = this.lib.getLatestLib(context);
+        global.lib = this.lib.getLatestLib(context) as LibraryApi;
     }
 
     private require(scriptPath: string) {
