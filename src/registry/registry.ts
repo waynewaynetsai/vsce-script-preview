@@ -64,7 +64,7 @@ export class CommandRegistry {
     public async init() {
         this.table = new BuiltInCommands(this.prefix).commandTable;
         Object.entries(this.table).forEach(([cmd, fn]) => {
-            logger.info(`registerCommand: ${cmd}`);
+            logger.info(`Register BuiltIn Command: ${cmd}`);
             return this.registerCommand(cmd, fn);
         });
         await Promise.resolve();
