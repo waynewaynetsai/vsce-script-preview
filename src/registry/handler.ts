@@ -163,7 +163,7 @@ export const copyRegisteredCommandId = async (table: { [key: string]: any }) => 
         await vscode.env.clipboard.writeText(commandId);
         vscode.window.showInformationMessage(`Copy commandId: ${commandId}`);
     }
-}
+};
 
 export const commandQuickpick = async (setting: QuickpickSetting) => {
     const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
