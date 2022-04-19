@@ -8,6 +8,7 @@ import * as fs from 'fs';
 import { QuickpickCommandItem, QuickpickSetting } from "../models";
 import { Instantiator } from "../instantiator";
 import { CommandRegistry } from "./registry";
+import { CommandTable } from "./table";
 
 // Dirty code here, take it easy!
 export async function createProject() {
@@ -147,8 +148,8 @@ export const rerunLastCommand = async () => {
     }
 };
 
-export const showAllCommands = (table: { [key: string]: any }) => async (namespaces: string[] = []) => {
-    const commandIds = Object.keys(table);
+export const showAllCommands = (table: CommandTable) => async (namespaces: string[] = []) => {
+    const commandIds = Object.keys(table.getAll());
     const displayCommandIds = namespaces.length > 0 ? commandIds.filter(k => namespaces.some(n => k.includes(`.${n}.`))) : commandIds;
     const commandId = await dropdown('Show all commands', displayCommandIds, '');
     if (commandId && commandId !== '') {
@@ -156,8 +157,8 @@ export const showAllCommands = (table: { [key: string]: any }) => async (namespa
     }
 };
 
-export const copyRegisteredCommandId = async (table: { [key: string]: any }) => {
-    const commandIds = Object.keys(table); 
+export const copyRegisteredCommandId = (table: CommandTable) => async () => {
+    const commandIds = Object.keys(table.getAll()); 
     const commandId = await dropdown('Show all commands', commandIds, '');
     if (commandId && commandId !== '') {
         await vscode.env.clipboard.writeText(commandId);
