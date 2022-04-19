@@ -161,7 +161,7 @@ export const copyRegisteredCommandId = async (table: { [key: string]: any }) => 
     const commandId = await dropdown('Show all commands', commandIds, '');
     if (commandId && commandId !== '') {
         await vscode.env.clipboard.writeText(commandId);
-        vscode.window.showInformationMessage(`Copy commandId: ${commandId}`);
+        vscode.window.showInformationMessage(`Copy commandId: ${commandId}!`);
     }
 };
 
