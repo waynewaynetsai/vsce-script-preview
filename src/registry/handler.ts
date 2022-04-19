@@ -156,6 +156,15 @@ export const showAllCommands = (table: { [key: string]: any }) => async (namespa
     }
 };
 
+export const copyRegisteredCommandId = async (table: { [key: string]: any }) => {
+    const commandIds = Object.keys(table); 
+    const commandId = await dropdown('Show all commands', commandIds, '');
+    if (commandId && commandId !== '') {
+        await vscode.env.clipboard.writeText(commandId);
+        vscode.window.showInformationMessage(`Copy commandId: ${commandId}`);
+    }
+}
+
 export const commandQuickpick = async (setting: QuickpickSetting) => {
     const items: QuickpickCommandItem[] = setting.items.map(originalSetting => ({
         ...originalSetting,
