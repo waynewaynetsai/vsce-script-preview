@@ -91,7 +91,7 @@ export function spawnShell(cmd: string, args: string[] = [], option: cp.SpawnOpt
 			});
 
 			proc.stderr?.on('data', (data) => {
-				logger.error(data.toString());
+				logger.info(data.toString());
 			});
 
 			proc.on('close', (code) => {
@@ -100,7 +100,7 @@ export function spawnShell(cmd: string, args: string[] = [], option: cp.SpawnOpt
 			});
 
 			proc.on('error', (err) => {
-				logger.info(`> ${cmd} exited with error ${err.toString()}`);
+				logger.error(`> ${cmd} exited with error ${err.toString()}`);
 				reject(err);
 			});
 		});

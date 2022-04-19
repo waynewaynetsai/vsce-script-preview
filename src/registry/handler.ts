@@ -147,6 +147,7 @@ export const rerunLastCommand = async () => {
     }
 };
 
+// TODO: Support namespace
 export const showAllCommands = (table: { [key: string]: any }) => async () => {
     const commandId = await dropdown('Show all commands', Object.keys(table), '');
     if (commandId && commandId !== '') {
