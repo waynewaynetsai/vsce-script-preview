@@ -147,9 +147,10 @@ export const rerunLastCommand = async () => {
     }
 };
 
-// TODO: Support namespace
-export const showAllCommands = (table: { [key: string]: any }) => async () => {
-    const commandId = await dropdown('Show all commands', Object.keys(table), '');
+export const showAllCommands = (table: { [key: string]: any }) => async (namespaces: string[] = []) => {
+    const commandIds = Object.keys(table);
+    const displayCommandIds = namespaces.length > 0 ? commandIds.filter(k => namespaces.some(n => k.includes(`.${n}.`))) : commandIds;
+    const commandId = await dropdown('Show all commands', displayCommandIds, '');
     if (commandId && commandId !== '') {
         await vscode.commands.executeCommand(commandId);
     }
