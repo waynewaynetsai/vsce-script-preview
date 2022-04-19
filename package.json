@@ -50,6 +50,10 @@
 			{
 				"title": "Vsce Script: Select Another Version of Library",
 				"command": "vsce-script.selectAnotherLibraryVersion"
+			},
+			{
+				"title": "Vsce Script: Copy Registered Command ID",
+				"command": "vsce-script.copyRegisteredCommandID"
 			}
 		],
 		"configuration": {
