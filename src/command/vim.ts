@@ -19,9 +19,9 @@ export function runCommands(...commands: CommandPayload[]) {
     return commands.reduce((acc, curr) => {
         let config: { command: string, args: any };
         if (typeof curr === "string") {
-           config = { command: curr, args: undefined };
+            config = { command: curr, args: undefined };
         } else {
-           config = curr;
+            config = curr;
         }
         return acc.then(_ => vscode.commands.executeCommand(config?.command, config?.args));
     }, Promise.resolve(null) as Thenable<null>);
@@ -39,6 +39,10 @@ export function invokeCommands(...args: any[]) {
 
 export function type(typeText: string): () => Thenable<void> {
     return () => vscode.commands.executeCommand("type", { text: typeText });
+}
+
+export function writeText(text: string): () => Thenable<void> {
+    return () => vscode.commands.executeCommand("default:type", { text });
 }
 
 export function typeKeys(typeTexts: string[]): () => Thenable<void> {
@@ -61,3 +65,5 @@ export const typeCharUnderCursor = () => {
     }
     return type(char);
 };
+
+
