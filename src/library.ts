@@ -2,7 +2,7 @@ import { SpawnOptions } from 'child_process';
 import { inject, provide } from 'injection';
 import * as vscode from 'vscode';
 import * as packageJSON from '../package.json';
-import { completionRegisterFactory, execCmd, execShell, invokeCommands, runAutomation, runCommands, runMacro, spawnShell, type, typeCharUnderCursor, typeKeys } from './command';
+import { completionRegisterFactory, execCmd, execShell, invokeCommands, runAutomation, runCommands, runMacro, spawnShell, type, typeCharUnderCursor, typeKeys, writeText } from './command';
 import { createNewFile, createNewFolder, findFirstOccurCharAboveCursor, findFirstOccurCharAtLine, getCharAt, getCharUnderCursor, getCurrentLine, getCursorPosition, getFirstCharOnLine, getLine, getSelectedText, setCursorPosition, switchToInsertModeSelection } from './editor'; import { Instance } from './instance';
 import { confirm, dropdown, input } from './interactive';
 import { commandQuickpick } from './registry';
@@ -27,6 +27,7 @@ export class Library {
                 typeCharUnderCursor,
                 type,
                 typeKeys,
+                writeText,
                 execCmd,
                 execShell,
                 spawnShell,
@@ -35,7 +36,7 @@ export class Library {
                 runCommands,
             },
             commands: {
-                registerCommand: (commandId: string, handler: (...args: any) => any) => this.registry.registerCommand(commandId, handler),
+                registerCommand: (commandId: string, handler: (...args: any) => any) => this.registry.registerScriptCommand(commandId, handler),
                 invokeCommands
             },
             promise: {
@@ -44,7 +45,8 @@ export class Library {
                 spawnShell: (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args),
                 typeCharUnderCursor: () => typeCharUnderCursor(),
                 type: (text: string) => type(text)(),
-                typeKeys: (texts: string[]) => typeKeys(texts),
+                typeKeys: (texts: string[]) => typeKeys(texts)(),
+                writeText: (text: string) => writeText(text)()
             },
             editor: {
                 registerCompletionProvider,

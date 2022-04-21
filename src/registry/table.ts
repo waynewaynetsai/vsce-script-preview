@@ -2,7 +2,9 @@ import * as vscode from 'vscode';
 import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, rerunLastCommand, showAllCommands, surroundWith, visualModeYank, copyRegisteredCommandId } from './handler';
 
 export class CommandTable {
-    private builtInCommands = {
+    private scriptCommands: string[] = [];
+
+    private userFacingCommands = {
         openProject: openScriptProject,
         createProject,
         rerunLastCommand,
@@ -18,33 +20,33 @@ export class CommandTable {
         commandQuickpick,
     };
 
-    private commands = {
-        ...this.builtInCommands,
-        ...this.customCommands
-    };
-
-    private scriptCommands: string[] = [];
-
     public getAll() {
-        const internalCommandTable = Object.entries(this.commands).map(([id, handler]) => {
-            return { commandId: `${this.prefix}.${id}`, handler };
-        }).reduce((table, { commandId, handler }) => {
-            table[commandId] = handler;
-            return table;
-        }, {});
+        const userfacingCommandTable = this.createCommandTable(this.userFacingCommands, (id) => `vsce-script.${id}`);
+        const customCommandsTable = this.createCommandTable(this.customCommands, (id) => `${this.prefix}.${id}`);
         const scriptCommandTable = this.scriptCommands.map(id => ({
-            commandId: `${this.prefix}.${id}`, handler: (...args: any[]) => vscode.commands.executeCommand(id, ...args)
+            commandId: id, handler: (...args: any[]) => vscode.commands.executeCommand(id, ...args)
         })).reduce((table, { commandId, handler }) => {
             table[commandId] = handler;
             return table;
         }, {});
         return {
-            ...internalCommandTable,
+            ...userfacingCommandTable,
+            ...customCommandsTable,
             ...scriptCommandTable
         };
     }
 
+    public createCommandTable(config: { [key: string]: (...args: any[]) => any}, commandIdMapper: Function) {
+        return Object.entries(config).map(([id, handler]) => {
+            return { commandId: commandIdMapper(id), handler };
+        }).reduce((table, { commandId, handler }) => {
+            table[commandId] = handler;
+            return table;
+        }, {});
+    }
+
     private _internal: { [key: string]: (...args: any[]) => any } | undefined = undefined;
+
     /**
      * Internal Command Table
      */
@@ -52,12 +54,12 @@ export class CommandTable {
         if (this._internal) {
             return this._internal;
         } else {
-            this._internal = Object.entries(this.commands).map(([id, handler]) => {
-                return { commandId: `${this.prefix}.${id}`, handler };
-            }).reduce((table, { commandId, handler }) => {
-                table[commandId] = handler;
-                return table;
-            }, {});
+            const userfacingCommandTable = this.createCommandTable(this.userFacingCommands, (id) => `vsce-script.${id}`);
+            const customCommandsTable = this.createCommandTable(this.customCommands, (id) => `${this.prefix}.${id}`);
+            this._internal = {
+                ...userfacingCommandTable,
+                ...customCommandsTable
+            };
             return this._internal;
         }
     }
