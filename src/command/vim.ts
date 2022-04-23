@@ -63,7 +63,7 @@ export const typeCharUnderCursor = () => {
         vscode.window.showErrorMessage(errorMessage);
         throw new Error(errorMessage);
     }
-    return type(char);
+    return type(char)();
 };
 
 
