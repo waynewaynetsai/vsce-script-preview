@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { switchToInsertModeSelection } from '../editor';
 import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, rerunLastCommand, showAllCommands, surroundWith, visualModeYank, copyRegisteredCommandId } from './handler';
 
 export class CommandTable {
@@ -9,7 +10,11 @@ export class CommandTable {
         createProject,
         rerunLastCommand,
         showAllCommands: showAllCommands(this),
-        copyRegisteredCommandId: copyRegisteredCommandId(this)
+    };
+
+    private vimCommands = {
+        visualModeYank,
+        switchToInsertModeSelection
     };
 
     private customCommands = {
@@ -18,11 +23,13 @@ export class CommandTable {
         surroundWith,
         visualModeYank,
         commandQuickpick,
+        switchToInsertModeSelection
     };
 
     public getAll() {
         const userfacingCommandTable = this.createCommandTable(this.userFacingCommands, (id) => `vsce-script.${id}`);
         const customCommandsTable = this.createCommandTable(this.customCommands, (id) => `${this.prefix}.${id}`);
+        const vimCommandsTable = this.createCommandTable(this.vimCommands, (id) => `${this.prefix}.vim.${id}`);
         const scriptCommandTable = this.scriptCommands.map(id => ({
             commandId: id, handler: (...args: any[]) => vscode.commands.executeCommand(id, ...args)
         })).reduce((table, { commandId, handler }) => {
@@ -32,6 +39,7 @@ export class CommandTable {
         return {
             ...userfacingCommandTable,
             ...customCommandsTable,
+            ...vimCommandsTable,
             ...scriptCommandTable
         };
     }
