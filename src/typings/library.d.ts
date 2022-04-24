@@ -31,7 +31,7 @@ export interface LibraryApi {
   };
   commands: {
     registerCommand: ( commandId: string, handler: (...args: any) => any) => void;
-    invokeCommands: (...args: any[]) => Thenable<null>;
+    invokeCommands: (...args: any[]) => Thenable<void>;
   };
   editor: {
     registerCompletionProvider: ( selector: vscode.DocumentSelector, completionItemProvider: vscode.CompletionItemProvider<vscode.CompletionItem>, ...triggerCommitCharacters: string[]) => void;
@@ -44,7 +44,7 @@ export interface LibraryApi {
     findFirstOccurCharAtLine: ( chars: string[], line: number, start: number) => string | undefined;
     findFirstOccurCharAboveCursor: (chars: string[]) => string | undefined;
     getCursorPosition: () => vscode.Position | undefined;
-    setCursorPosition: (pos: vscode.Position) => () => Promise<any>;
+    setCursorPosition: (pos: vscode.Position) => Promise<any>;
   };
   promise: {
     execCmd: ( payload: string | { command: string; args: object }) => Thenable<unknown>;
