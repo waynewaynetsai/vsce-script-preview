@@ -22,11 +22,15 @@ export class CommandRegistry {
 
     @init()
     public async init() {
+        this.registerBuiltInCommand();
+        await Promise.resolve();
+    }
+
+    public registerBuiltInCommand() {
         Object.entries(this.table.internal).forEach(([cmd, fn]) => {
             logger.info(`Register Built-In Command: ${cmd}`);
             return this.registerCommand(cmd, fn);
         });
-        await Promise.resolve();
     }
 
     public registerCommand(commandId: string, handler: (...args: any) => any) {
@@ -36,5 +40,10 @@ export class CommandRegistry {
             return await handler(...args);
         };
         registerCommand(commandId, commandHandler);
+    }
+
+    public registerScriptCommand(commandId: string, handler: (...args: any) => any) {
+       this.table.registerScriptCommand(commandId);
+       this.registerCommand(commandId, handler); 
     }
 }

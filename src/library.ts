@@ -24,25 +24,25 @@ export class Library {
         const lib = {
             version: this.version,
             automation: {
-                typeCharUnderCursor,
                 type,
                 typeKeys,
+                typeCharUnderCursor,
                 writeText,
                 execCmd,
                 execShell,
                 spawnShell,
                 runMacro,
-                runAutomation,
                 runCommands,
+                runAutomation,
             },
             commands: {
                 registerCommand: (commandId: string, handler: (...args: any) => any) => this.registry.registerScriptCommand(commandId, handler),
                 invokeCommands
             },
             promise: {
-                execCmd: (payload: string | { command: string; args: object; }) => execCmd(payload),
-                execShell: (cmd: string) => execShell(cmd),
-                spawnShell: (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args),
+                execCmd: (payload: string | { command: string; args: object; }) => execCmd(payload)(),
+                execShell: (cmd: string) => execShell(cmd)(),
+                spawnShell: (...args: [cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined]) => spawnShell.apply(null, args)(),
                 typeCharUnderCursor: () => typeCharUnderCursor(),
                 type: (text: string) => type(text)(),
                 typeKeys: (texts: string[]) => typeKeys(texts)(),
@@ -58,8 +58,6 @@ export class Library {
                 getCharUnderCursor,
                 findFirstOccurCharAtLine,
                 findFirstOccurCharAboveCursor,
-                createNewFile,
-                createNewFolder,
                 getCursorPosition,
                 setCursorPosition
             },

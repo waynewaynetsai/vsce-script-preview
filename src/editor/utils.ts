@@ -42,21 +42,36 @@ export function getCharAt(document: vsc.TextDocument, position: Position): strin
  */
 export function findFirstOccurCharAtLine(chars: string[], line: number, start: number): string | undefined {
     const lineText = getLine(line);
-    for (let i = start - 1; i >= 1; i--) {
-        if (chars.includes(lineText?.[i] ?? '')) {
-            return lineText?.[i];
+    for (let i = start; i >= 1; i--) {
+        if (chars.includes(lineText?.[i - 1] ?? '')) {
+            return lineText?.[i - 1];
         }
     }
     return undefined;
 }
 
+
+//  * TODO: Consider String Cases1:  '"' + ""+|'"'
+//  * TODO: Consider String Cases2:  '123' + '123'
+function isAtSurroundString(surroundChar: `'` | '"' | '`', line: number, character: number) {
+    const lineText = getLine(line);
+    if (!lineText) return;
+    const matchedPairs = lineText.split('')
+        .map((char, index) => ({ char, index }))
+        .filter(matched => surroundChar === matched.char);
+    const surroundCharBeforeCursor = matchedPairs.filter(matched => matched.index > character);
+    const surroundCharUntilCursorRight = matchedPairs.filter(matched => matched.index > character + 1);
+    return (surroundCharBeforeCursor.length % 2 !== 0) && (surroundCharUntilCursorRight.length % 2 === 0);
+}
+
 /**
  * Find specific character backward from current cursor position
+ * TODO: avoid anotehr char concat with occur character
  */
-export function findFirstOccurCharAtDocument(chars: string[]): string | undefined {
+export function findFirstOccurCharAboveCursor(chars: string[]): string | undefined {
     const pos = getCursorPosition();
     if (!pos) return;
-    let char = findFirstOccurCharAtLine(chars, pos.line, pos.character);
+    let char = findFirstOccurCharAtLine(chars, pos.line, pos.character + 1);
     let line = pos.line - 1;
     while (!char && line > 1) {
         const lineLength = getLine(line)?.length;
@@ -117,6 +132,6 @@ export function openProject(fsPath: string, option?: {
     return spawnShell('code', args);
 }
 
-export function copyProjectTemplate(source: string, target: string, option: { overwrite: boolean } = { overwrite: false }) {
+export function copyFileOrFolder(source: string, target: string, option: { overwrite: boolean } = { overwrite: false }) {
     return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option);
 }

@@ -25,8 +25,8 @@ export function switchToInsertModeSelection(): Promise<void> {
 	});
 }
 
-export function setCursorPosition(pos: vsc.Position): () => Promise<any> {
-	return () => new Promise((resolve, _reject) => {
+export function setCursorPosition(pos: vsc.Position): Promise<any> {
+	return new Promise((resolve, _reject) => {
 		const editor = vsc.window.activeTextEditor;
 		if (!editor) return;
 		setTimeout(() => {

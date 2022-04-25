@@ -24,7 +24,7 @@ export function runCommands(...commands: CommandPayload[]) {
             config = curr;
         }
         return acc.then(_ => vscode.commands.executeCommand(config?.command, config?.args));
-    }, Promise.resolve(null) as Thenable<null>);
+    }, Promise.resolve(null) as Thenable<void>);
 }
 
 export function invokeCommands(...args: any[]) {
@@ -34,7 +34,7 @@ export function invokeCommands(...args: any[]) {
     } else {
         commands = args;
     }
-    return commands.reduce((acc, curr) => acc.then(_ => curr()), Promise.resolve(null) as Thenable<null>);
+    return commands.reduce((acc, curr) => acc.then(_ => curr()), Promise.resolve(null) as Thenable<void>);
 }
 
 export function type(typeText: string): () => Thenable<void> {
@@ -63,7 +63,7 @@ export const typeCharUnderCursor = () => {
         vscode.window.showErrorMessage(errorMessage);
         throw new Error(errorMessage);
     }
-    return type(char);
+    return type(char)();
 };
 
 

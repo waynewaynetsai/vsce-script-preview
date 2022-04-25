@@ -18,44 +18,42 @@ type CommandPayload = (string | { command: string; args: object });
 export interface LibraryApi {
   version: string;
   automation: {
-    typeCharUnderCursor: () => () => Thenable<void>;
     type: (typeText: string) => () => Thenable<void>;
-    writeText: (text: string) => () => Thenable<void>;
     typeKeys: (typeTexts: string[]) => () => Thenable<void>;
+    typeCharUnderCursor: () => Thenable<void>;
+    writeText: (text: string) => () => Thenable<void>;
     execCmd: <T = unknown>( cmd: string | { command: string; args: object }) => () => Thenable<T>;
     execShell: (cmd: string) => () => Thenable<void>;
     spawnShell: ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable<void>;
-    runMacro: (cmds: string[]) => Thenable<null>;
-    runAutomation: (...args: any[]) => Thenable<null>;
-    runCommands: ( ...commands: CommandPayload[]) => Thenable<null>;
+    runMacro: (typeTexts: string[]) => Thenable<void>;
+    runAutomation: (...args: any[]) => Thenable<void>;
+    runCommands: ( ...commands: CommandPayload[]) => Thenable<void>;
   };
   commands: {
     registerCommand: ( commandId: string, handler: (...args: any) => any) => void;
-    invokeCommands: (...args: any[]) => Thenable<null>;
-  };
-  promise: {
-    execCmd: ( payload: string | { command: string; args: object }) => () => Thenable<unknown>;
-    execShell: (cmd: string) => () => Thenable<void>;
-    spawnShell: ( cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined) => () => Thenable<void>;
-    typeCharUnderCursor: () => () => Thenable<void>;
-    type: (text: string) => Thenable<void>;
-    typeKeys: (texts: string[]) => Thenable<void>;
-    writeText: (text: string) => Thenable<void>;
+    invokeCommands: (...args: any[]) => Thenable<void>;
   };
   editor: {
     registerCompletionProvider: ( selector: vscode.DocumentSelector, completionItemProvider: vscode.CompletionItemProvider<vscode.CompletionItem>, ...triggerCommitCharacters: string[]) => void;
-    getFirstCharOnLine: ( document: vscode.TextDocument, line: number) => vscode.Position;
     getLine: (lineNumber: number) => string | undefined;
     getCurrentLine: (editor: vscode.TextEditor) => string;
     getCharAt: ( document: vscode.TextDocument, position: vscode.Position) => string;
     getSelectedText: () => string | undefined;
     getCharUnderCursor: () => string | undefined;
+    getFirstCharOnLine: ( document: vscode.TextDocument, line: number) => vscode.Position;
     findFirstOccurCharAtLine: ( chars: string[], line: number, start: number) => string | undefined;
     findFirstOccurCharAboveCursor: (chars: string[]) => string | undefined;
-    createNewFile: ( filename: string, content: string, fsPath?: string | undefined) => Thenable<void> | undefined;
-    createNewFolder: ( name: string, fsPath?: string | undefined) => Thenable<void> | undefined;
     getCursorPosition: () => vscode.Position | undefined;
-    setCursorPosition: (pos: vscode.Position) => () => Promise<any>;
+    setCursorPosition: (pos: vscode.Position) => Promise<any>;
+  };
+  promise: {
+    execCmd: ( payload: string | { command: string; args: object }) => Thenable<unknown>;
+    execShell: (cmd: string) => Thenable<void>;
+    spawnShell: ( cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined) => Thenable<void>;
+    typeCharUnderCursor: () => Thenable<void>;
+    type: (text: string) => Thenable<void>;
+    typeKeys: (texts: string[]) => Thenable<void>;
+    writeText: (text: string) => Thenable<void>;
   };
   interactive: {
     confirm: ( title: string, placeHolder?: "Yes" | "No", options?: vscode.QuickPickOptions) => Promise<boolean>;
