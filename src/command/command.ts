@@ -68,11 +68,11 @@ export function execShell(cmd: string, options: cp.SpawnOptions & { hiddenOutput
 			try {
 				const proc = cp.spawn(config.cmd, [config.arg, cmd], options);
 				proc.stdout?.on('data', (data) => {
-					logger.info(data.toString());
+					logger.log(data.toString());
 				});
 	
 				proc.stderr?.on('data', (data) => {
-					logger.info(data.toString());
+					logger.log(data.toString());
 				});
 	
 				proc.on('close', (code) => {
