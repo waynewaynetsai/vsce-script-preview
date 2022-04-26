@@ -1,6 +1,7 @@
 import * as vsc from 'vscode';
 import * as cp from 'child_process';
 import { logger } from '../logger';
+import { getCurrentWorkspaceFolder } from '../editor';
 
 export function commandRegisterFactory(context: vsc.ExtensionContext) {
 	const registerCommand = (commandId: string, commandHandler: (...args: any[]) => any) => {
@@ -61,6 +62,10 @@ export function execShell(cmd: string, options: cp.SpawnOptions & { hiddenOutput
 		});
 		if (!options.hiddenOutput) {
 			logger.show();
+		}
+		if (!options.cwd) {
+			const workspace = await getCurrentWorkspaceFolder();
+			options.cwd = workspace?.uri?.fsPath ?? process.cwd();
 		}
 		logger.info(`\n$ ${cmd}\n`);
 		logger.info(`Exec shell command options: ${JSON.stringify(options)}`);
