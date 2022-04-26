@@ -52,22 +52,42 @@ export function insertSnippet(snippet: string) {
 /**
  * Exec a shell command
  */
-export function execShell(cmd: string) {
+export function execShell(cmd: string, options: cp.SpawnOptions & { hiddenOutput?: boolean } = { hiddenOutput: false }) {
+	const config = process.platform === 'win32' ? { cmd: 'cmd', arg: '/C' } : { cmd: 'sh', arg: '-c' };
+
 	return () => vsc.window.withProgress({ location: vsc.ProgressLocation.Notification }, async (progress) => {
 		progress.report({
 			message: `Execute shell command: ${cmd}...`,
 		});
+		if (!options.hiddenOutput) {
+			logger.show();
+		}
+		logger.info(`\n$ ${cmd}\n`);
+		logger.info(`Exec shell command options: ${JSON.stringify(options)}`);
 		await new Promise((resolve, reject) => {
-			cp.exec(cmd, (err, stdout, stderr) => {
-				if (err) {
-					console.error(stderr);
-					logger.error(`${err}`);
+			try {
+				const proc = cp.spawn(config.cmd, [config.arg, cmd], options);
+				proc.stdout?.on('data', (data) => {
+					logger.info(data.toString());
+				});
+	
+				proc.stderr?.on('data', (data) => {
+					logger.info(data.toString());
+				});
+	
+				proc.on('close', (code) => {
+					logger.info(`> ${cmd} exited with code ${code?.toString()}`);
+					resolve(null);
+				});
+	
+				proc.on('error', (err) => {
+					logger.error(`> ${cmd} exited with error ${err.toString()}`);
 					reject(err);
-				}
-				logger.show();
-				logger.info(stdout.toString());
-				resolve(stdout);
-			});
+				});
+			} catch (err) {
+				logger.error(`${err}`);
+				reject(err);
+			}
 		});
 	});
 }
@@ -80,6 +100,7 @@ export function spawnShell(cmd: string, args: string[] = [], option: cp.SpawnOpt
 		progress.report({
 			message: `Execute shell command: ${cmd}...`,
 		});
+
 		await new Promise((resolve, reject) => {
 			const proc = cp.spawn(cmd, args, option);
 			logger.show();
