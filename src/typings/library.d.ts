@@ -23,7 +23,7 @@ export interface LibraryApi {
     typeCharUnderCursor: () => Thenable<void>;
     writeText: (text: string) => () => Thenable<void>;
     execCmd: <T = unknown>( cmd: string | { command: string; args: object }) => () => Thenable<T>;
-    execShell: (cmd: string) => () => Thenable<void>;
+    execShell: (cmd: string, options: SpawnOptions & { hiddenOutput?: boolean }) => () => Thenable<void>;
     spawnShell: ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable<void>;
     runMacro: (typeTexts: string[]) => Thenable<void>;
     runAutomation: (...args: any[]) => Thenable<void>;
@@ -54,7 +54,7 @@ export interface LibraryApi {
   },
   promise: {
     execCmd: ( payload: string | { command: string; args: object }) => Thenable<unknown>;
-    execShell: (cmd: string) => Thenable<void>;
+    execShell: (cmd: string, options: SpawnOptions & { hiddenOutput?: boolean }) => () => Thenable<void>;
     spawnShell: ( cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined) => Thenable<void>;
     typeCharUnderCursor: () => Thenable<void>;
     type: (text: string) => Thenable<void>;
