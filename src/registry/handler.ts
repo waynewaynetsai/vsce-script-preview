@@ -1,5 +1,5 @@
 import { execCmd, invokeCommands, runMacro, spawnShell } from "../command";
-import { copyFileOrFolder, getCurrentLine, getCursorPosition, openProject, switchToInsertModeSelection } from "../editor";
+import { copyFileOrFolder, getCurrentLine, openProject, switchToInsertModeSelection } from "../editor";
 import { confirm, dropdown, input } from "../interactive";
 import { logger } from "../logger";
 import * as vscode from 'vscode';
@@ -28,7 +28,7 @@ export async function createProject() {
     const projectType: string | undefined = await dropdown('Create Typescript or Javascript script project?', [
         'javascript',
         'typescript'
-    ], 'typescript');
+    ], { placeHolder: 'typescript' });
     if (!projectType)
         return;
     // STEP2: select folder
@@ -43,7 +43,7 @@ export async function createProject() {
         return;
     if (!projectUris?.[0])
         return;
-    const projectName = await input('Input your project name', 'vsce-script-project');
+    const projectName = await input('Input your project name', { placeHolder: 'vsce-script-project' });
     if (!projectName || projectName === '') return;
     console.log('projectName', projectName);
     const projectPath = path.join(projectUris?.[0].fsPath, projectName);
@@ -68,7 +68,7 @@ export async function createProject() {
         logger.error(`Fail to create script project: ${JSON.stringify(err)}`);
         vscode.window.showErrorMessage(`Fail to create script project: ${JSON.stringify(err)}`);
     }
-    const useNpm = await dropdown('Use yarn or npm ?', ['yarn', 'npm'], 'npm') === 'npm';
+    const useNpm = await dropdown('Use yarn or npm ?', ['yarn', 'npm'], { placeHolder: 'npm' }) === 'npm';
     const newWindow = await confirm('Open project at new window?');
     invokeCommands([
         // STEP4: install project deps
@@ -139,10 +139,12 @@ export const visualModeYank = async () => {
 };
 
 export const rerunLastCommand = async () => {
-    const commandRegistry = Instantiator.container.get<CommandRegistry>(CommandRegistry);
-    const lastCommandInfo = commandRegistry.lastExecutedCommand;
-    if (lastCommandInfo) {
-        await vscode.commands.executeCommand(lastCommandInfo.command, lastCommandInfo.args);
+    const commandRegistry = await Instantiator.container.getAsync<CommandRegistry>(CommandRegistry);
+    const latestCommandInfos = commandRegistry.lastExecutedCommands;
+    if (latestCommandInfos?.[0].command === 'vsce-script.showAllCommands' && latestCommandInfos?.[1]) {
+        await vscode.commands.executeCommand(latestCommandInfos[1].command, ...latestCommandInfos[1].args);
+    } else if (latestCommandInfos?.[0]) {
+        await vscode.commands.executeCommand(latestCommandInfos[0].command, ...latestCommandInfos[0].args);
     } else {
         vscode.window.showErrorMessage('Has no last command!');
     }
@@ -151,7 +153,7 @@ export const rerunLastCommand = async () => {
 export const showAllCommands = (table: CommandTable) => async (namespaces: string[] = []) => {
     const commandIds = Object.keys(table.getAll());
     const displayCommandIds = namespaces.length > 0 ? commandIds.filter(k => namespaces.some(n => k.includes(`.${n}.`))) : commandIds;
-    const commandId = await dropdown('Show all commands', displayCommandIds, '');
+    const commandId = await dropdown('Show all commands', displayCommandIds);
     if (commandId && commandId !== '') {
         await vscode.commands.executeCommand(commandId);
     }
@@ -159,7 +161,7 @@ export const showAllCommands = (table: CommandTable) => async (namespaces: strin
 
 export const copyRegisteredCommandId = (table: CommandTable) => async () => {
     const commandIds = Object.keys(table.getAll()); 
-    const commandId = await dropdown('Show all commands', commandIds, '');
+    const commandId = await dropdown('Show all commands', commandIds);
     if (commandId && commandId !== '') {
         await vscode.env.clipboard.writeText(commandId);
         vscode.window.showInformationMessage(`Copy commandId: ${commandId}!`);
