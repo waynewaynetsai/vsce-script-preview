@@ -14,7 +14,7 @@ export class CommandRegistry {
 
     private table = new CommandTable(this.prefix);
 
-    public lastExecutedCommand: { command: string; args: any } | undefined = undefined;
+    public lastExecutedCommands: { command: string; args: any[] }[] = [];
 
     private get prefix(): string {
         return vscode.workspace.getConfiguration('vsce-script').get('commandPrefix') || 'vsce-script';
@@ -36,14 +36,17 @@ export class CommandRegistry {
     public registerCommand(commandId: string, handler: (...args: any) => any) {
         const [registerCommand] = commandRegisterFactory(this.context);
         const commandHandler = async (...args: any[]) => {
-            this.lastExecutedCommand = { command: commandId, args: args?.[0] };
+            if (commandId !== 'vsce-script.rerunLastCommand') {
+                const latestCommandPayloads = this.lastExecutedCommands[0] ? [this.lastExecutedCommands[0]] : [];
+                this.lastExecutedCommands = [{ command: commandId, args }, ...latestCommandPayloads];
+            }
             return await handler(...args);
         };
         registerCommand(commandId, commandHandler);
     }
 
     public registerScriptCommand(commandId: string, handler: (...args: any) => any) {
-       this.table.registerScriptCommand(commandId);
-       this.registerCommand(commandId, handler); 
+        this.table.registerScriptCommand(commandId);
+        this.registerCommand(commandId, handler);
     }
 }
