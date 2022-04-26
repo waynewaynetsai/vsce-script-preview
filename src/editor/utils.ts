@@ -135,3 +135,14 @@ export function openProject(fsPath: string, option?: {
 export function copyFileOrFolder(source: string, target: string, option: { overwrite: boolean } = { overwrite: false }) {
     return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option);
 }
+
+export function getCurrentWorkspaceFolder() {
+    const activeEditor = vsc.window.activeTextEditor;
+
+    if (!activeEditor) return vsc.workspace.workspaceFolders?.[0];
+
+    return vsc.workspace.workspaceFolders?.find( (workspace) => {
+            const relative = path.relative(workspace.uri.fsPath, activeEditor.document.uri.path);
+            return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+    });
+}
