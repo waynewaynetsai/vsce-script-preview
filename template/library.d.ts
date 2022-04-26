@@ -20,7 +20,7 @@ export interface LibraryApi {
       typeCharUnderCursor: () => () => Thenable<void>;
       type: (typeText: string) => () => Thenable<void>;
       typeKeys: (typeTexts: string[]) => () => Thenable<void>;
-      execShell: (cmd: string) => () => Thenable<void>;
+      execShell: (cmd: string, options: cp.SpawnOptions & { hiddenOutput?: boolean } = { hiddenOutput: false }) => () => Thenable<void>;
       spawnShell: (
         cmd: string,
         args?: string[],
@@ -44,7 +44,7 @@ export interface LibraryApi {
     ) => void;
   };
   promise: {
-    execShell: (cmd: string) => () => Thenable<void>;
+    execShell: (cmd: string, options: cp.SpawnOptions & { hiddenOutput?: boolean } = { hiddenOutput: false }) => Thenable<void>;
     spawnShell: (
       cmd: string,
       args?: string[] | undefined,
