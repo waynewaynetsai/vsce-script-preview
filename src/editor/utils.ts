@@ -66,7 +66,7 @@ function isAtSurroundString(surroundChar: `'` | '"' | '`', line: number, charact
 
 /**
  * Find specific character backward from current cursor position
- * TODO: avoid anotehr char concat with occur character
+ * TODO: avoid another char concat with occur character
  */
 export function findFirstOccurCharAboveCursor(chars: string[]): string | undefined {
     const pos = getCursorPosition();
@@ -136,13 +136,29 @@ export function copyFileOrFolder(source: string, target: string, option: { overw
     return vsc.workspace.fs.copy(vsc.Uri.file(source), vsc.Uri.file(target), option);
 }
 
-export function getCurrentWorkspaceFolder() {
-    const activeEditor = vsc.window.activeTextEditor;
-
-    if (!activeEditor) return vsc.workspace.workspaceFolders?.[0];
-
-    return vsc.workspace.workspaceFolders?.find( (workspace) => {
-            const relative = path.relative(workspace.uri.fsPath, activeEditor.document.uri.path);
-            return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
+function findWorkspace(activeEditor: vsc.TextEditor) {
+    logger.debug(`findWorkspace::activeEditor: ${activeEditor.document.uri.fsPath}`);
+    return vsc.workspace.workspaceFolders?.find((workspace) => {
+        const relative = path.relative(workspace.uri.fsPath, activeEditor.document.uri.path);
+        return relative && !relative.startsWith('..') && !path.isAbsolute(relative);
     });
+}
+
+export async function getCurrentWorkspaceFolder() {
+    let activeEditor = vsc.window.activeTextEditor;
+
+    // Close panel with output channel
+    if (activeEditor?.document?.uri?.fsPath?.includes('extension-output-')) {
+        await vsc.commands.executeCommand(`workbench.action.closePanel`);
+        activeEditor = vsc.window.activeTextEditor;
+    }
+
+    if (!activeEditor) {
+        logger.debug(`getCurrentWorkspaceFolder: activeEditor not found!`);
+        return vsc.workspace.workspaceFolders?.[0];
+    }
+
+    logger.debug(`getCurrentWorkspaceFolder: ${JSON.stringify(vsc.workspace.workspaceFolders)}`);
+
+    return findWorkspace(activeEditor);
 }
