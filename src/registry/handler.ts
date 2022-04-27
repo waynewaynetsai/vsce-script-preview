@@ -1,5 +1,5 @@
 import { execCmd, invokeCommands, runMacro, spawnShell } from "../command";
-import { copyFileOrFolder, getCurrentLine, openProject, switchToInsertModeSelection } from "../editor";
+import { copyFileOrFolder, getCurrentLine, getCurrentWorkspaceFolder, openProject, switchToInsertModeSelection } from "../editor";
 import { confirm, dropdown, input } from "../interactive";
 import { logger } from "../logger";
 import * as vscode from 'vscode';
@@ -9,6 +9,8 @@ import { QuickpickCommandItem, QuickpickSetting } from "../models";
 import { Instantiator } from "../instantiator";
 import { CommandRegistry } from "./registry";
 import { CommandTable } from "./table";
+import { Library } from "../library";
+import editJsonFile from "edit-json-file";
 
 // Dirty code here, take it easy!
 export async function createProject() {
@@ -180,4 +182,15 @@ export const commandQuickpick = async (setting: QuickpickSetting) => {
     if (!selected)
         return;
     await vscode.commands.executeCommand(selected.command!, selected.args!);
+};
+
+export const upgradeLibraryToLatestVersion = async () => {
+   const projectPath = await vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
+   if (!projectPath) return;
+   const library = await Instantiator.container.getAsync<Library>(Library);
+   const libraryTypingsPath = path.resolve(projectPath, 'typings', 'library.d.ts');
+   await copyFileOrFolder(libraryTypingsPath, `./template/version/version-${library.version}/typings/library.d.ts`, { overwrite: true });
+   const file = editJsonFile(path.join(projectPath, 'package.json'));
+   file.set('version', library.version);
+   file.save();
 };
