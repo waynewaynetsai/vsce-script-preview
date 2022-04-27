@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { commandRegisterFactory, spawnShell } from '../command';
+import { commandRegisterFactory, execShell, spawnShell } from '../command';
 import { Instantiator } from '../instantiator';
 import { confirm } from '../interactive';
 import { ScriptLoader } from '../loader';
@@ -15,7 +15,7 @@ export function registerReloadCommand(context: vscode.ExtensionContext) {
 			const compileProject = await confirm('Compile Typescript Project ?');
 			const existProjectPath = vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
 			if (compileProject) {
-				await spawnShell('npm', ['run', 'compile'], { cwd: existProjectPath })();
+				await execShell('npm run compile', { cwd: existProjectPath })();
 			}
 		}
 		context.subscriptions.forEach(d => d.dispose());
