@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 
 import * as vscode from 'vscode';
-import { Library } from './library';
+import { Library } from './library/library';
 import { Instantiator } from './instantiator';
 import { registerReloadCommand, registerWorkspaceChangeEvent } from './registry';
+import { logger } from './logger';
 
 export async function activate(context: vscode.ExtensionContext) {
 	try {
@@ -11,10 +12,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		const library = await Instantiator.container.getAsync<Library>(Library);
 		registerWorkspaceChangeEvent(context);
 		registerReloadCommand(context);
-		return library.getLatestLib(context);
-	} catch (error) {
-		const msg = 'Unexpected Vsce-Script Error';
-		console.error(msg, error);
+		return await library.getLatestLib();
+	} catch (error: any) {
+		const msg = 'Vsce-Script Unexpected Error';
+		logger.error(`[${msg}] ${error.message}`);
 		vscode.window.showErrorMessage(`${msg}: ${JSON.stringify(error)}`);
 	}
 }
