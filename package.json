@@ -54,12 +54,12 @@
 				"vsce-script.projectPath": {
 					"type": "string",
 					"default": "",
-					"description": "Vsce script project path"
+					"description": "Vsce Script Project path"
 				},
 				"vsce-script.commandPrefix": {
 					"type": "string",
 					"default": "vsce-script",
-					"description": "Vsce script command prefix"
+					"description": "Vsce Script Command prefix"
 				},
 				"practice-workspace.input": {
 					"type": "string",
@@ -135,6 +135,7 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
+		"@types/fs-extra": "^9.0.13",
 		"@types/glob": "^7.1.4",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "14.x",
@@ -154,7 +155,8 @@
 		"xmldom": "^0.6.0"
 	},
 	"dependencies": {
-		"fs-extra": "^10.0.1",
+		"edit-json-file": "^1.7.0",
+		"fs-extra": "^10.1.0",
 		"injection": "^1.8.6",
 		"reflect-metadata": "^0.1.13"
 	}
