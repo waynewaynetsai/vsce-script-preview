@@ -33,17 +33,15 @@ export class ScriptLoader implements vscode.Disposable {
 
     @init()
     public async init() {
-        this.injectGlobalDependencies(this.context);
-        console.log('injectGlobalDependencies');
+        await this.injectGlobalDependencies(this.context);
         this.load();
         this.context.subscriptions.push(this);
         return Promise.resolve();
     }
 
-    public injectGlobalDependencies(context: vscode.ExtensionContext) {
+    public async injectGlobalDependencies(context: vscode.ExtensionContext) {
         global.vscode = vscodeApi;
-        console.log('inject', this.lib);
-        global.lib = this.lib.getLatestLib(context);
+        global.lib = await this.lib.getLatestLib();
     }
 
     private require(scriptPath: string) {
