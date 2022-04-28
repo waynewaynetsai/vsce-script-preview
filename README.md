@@ -467,7 +467,7 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | getCurrentLine                | (editor: vscode.TextEditor) => string;          |
 | getSelectedText               | () => string \| undefined;                       |
 | getCharUnderCursor            | () => string \| undefined;                       |
-| findFirstOccurCharAtLine      | ( chars: string[], line: number, start: number) => string | undefined;                      |
+| findFirstOccurCharAtLine      | ( chars: string[], line: number, start: number) => string \| undefined;                      |
 | findFirstOccurCharAboveCursor | (chars: string[]) => string \| undefined;        |
 | getCursorPosition             | () => vscode.Position \| undefined;              |
 | setCursorPosition             | (pos: vscode.Position) => Promise\<any\>;         |
@@ -478,7 +478,7 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 
 | Function            |  Type Signature                           |
 | ------------------- | ----------------------------------------- |
-| confirm             | ( title: string, placeHolder?: "Yes" | "No", options?: vscode.QuickPickOptions) => Promise\<boolean\>;     |
+| confirm             | ( title: string, placeHolder?: "Yes" \| "No", options?: vscode.QuickPickOptions) => Promise\<boolean\>;     |
 | input               | ( prompt: string, placeHolder: string, options?: vscode.InputBoxOptions) => Promise\<string\>;  |
 | dropdown            | ( title: string, items: string[], placeHolder: string, options?: vscode.QuickPickOptions) => Promise\<string | undefined>\;                     |
 | commandQuickpick    | ( setting: QuickpickSetting) => Promise\<void\>;     |
