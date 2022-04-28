@@ -9,6 +9,12 @@ export class Library {
     @inject(Instance.ExtensionContext)
     public context: vscode.ExtensionContext;
 
+    public get versions() {
+       return [
+           '1.0.0'
+       ];
+    }
+
     public get version(): string {
         return '1.0.0';
     };
