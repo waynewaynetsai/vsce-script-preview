@@ -6,7 +6,7 @@ import { WorkspaceConfig } from './config';
 import { init, inject, provide, scope, ScopeEnum } from 'injection';
 import { Library } from './library';
 import { Instance } from './instance';
-import { LibraryApi } from './typings/library';
+import fse from 'fs-extra';
 
 const vscodeApi: typeof vscode = require('vscode');
 
@@ -33,15 +33,17 @@ export class ScriptLoader implements vscode.Disposable {
 
     @init()
     public async init() {
-        await this.injectGlobalDependencies(this.context);
-        this.load();
+        await this.load();
         this.context.subscriptions.push(this);
         return Promise.resolve();
     }
 
-    public async injectGlobalDependencies(context: vscode.ExtensionContext) {
+    public async injectGlobalDependencies(projectPath: string) {
+        const version: string = await fse.readJSON(path.join(projectPath, 'package.json'))
+            .then(json => this.lib.versions.includes(json?.version) ? json.version : this.lib.version)
+            .catch(_ => this.lib.version);
         global.vscode = vscodeApi;
-        global.lib = await this.lib.getLatestLib();
+        global.lib = await this.lib.getLib(version);
     }
 
     private require(scriptPath: string) {
@@ -51,7 +53,7 @@ export class ScriptLoader implements vscode.Disposable {
         return this.cacheScript;
     }
 
-    public load() {
+    public async load() {
         try {
             console.log('lib', this.lib);
             const configPath = vscode.workspace.getConfiguration().get<string>(WorkspaceConfig.ProjectPath)!;
@@ -68,6 +70,7 @@ export class ScriptLoader implements vscode.Disposable {
                     return;
                 }
             }
+            await this.injectGlobalDependencies(projectPath);
             console.log('Debug script', this.context);
             console.log('project', projectPath);
 
