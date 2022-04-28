@@ -429,15 +429,15 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 
 | Function            |  Type Signature                                 |
 | ------------------- | -------------------------------------------     |
-| type                | (typeText: string) => () => Thenable<void>;     |
-| typeKeys            | (typeTexts: string[]) => () => Thenable<void>;  |
-| typeCharUnderCursor | () => Thenable<void>;                           |
-| writeText           | (text: string) => () => Thenable<void>;         |
-| execCmd             | <T = unknown>( cmd: string \| { command: string; args: object }) => () => Thenable<T>; |  
-| execShell           | (cmd: string) => () => Thenable<void>;          |
-| spawnShell          | ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable<void>; |                        
-| runMacro            | (typeTexts: string[]) => Thenable<void>;        |
-| runCommands         | (...args: any[]) => Thenable<void>;             |
+| type                | (typeText: string) => () => Thenable\<void\>;     |
+| typeKeys            | (typeTexts: string[]) => () => Thenable\<void\>;  |
+| typeCharUnderCursor | () => Thenable\<void\>;                           |
+| writeText           | (text: string) => () => Thenable\<void\>;         |
+| execCmd             | \<T = unknown\>( cmd: string \| { command: string; args: object }) => () => Thenable\<T\>; |  
+| execShell           | (cmd: string) => () => Thenable\<void\>;          |
+| spawnShell          | ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable\<void\>; |                        
+| runMacro            | (typeTexts: string[]) => Thenable\<void\>;        |
+| runCommands         | (...args: any[]) => Thenable\<void\>;             |
 | runAutomation       | ( ...commands: CommandPayload[]) => Thenable\<void\>;  |
 
 ### Commands
@@ -454,7 +454,7 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | type                | (typeText: string) => Thenable\<void\>;     |
 | typeKeys            | (typeTexts: string[]) => Thenable\<void\>;  |
 | typeCharUnderCursor | () => Thenable\<void\>;                     |
-| writeText           | (text: string) => Thenable<void>;         |
+| writeText           | (text: string) => Thenable\<void\>;         |
 | execCmd             | <T = unknown>( cmd: string \| { command: string; args: object }) =>  Thenable\<T\>; |  
 | execShell           | (cmd: string) => Thenable\<void\>;          |
 | spawnShell          | ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable\<void\>; |                        
@@ -478,9 +478,9 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 
 | Function            |  Type Signature                           |
 | ------------------- | ----------------------------------------- |
-| confirm             | ( title: string, placeHolder?: "Yes" | "No", options?: vscode.QuickPickOptions) => Promise<boolean>;     |
-| input               | ( prompt: string, placeHolder: string, options?: vscode.InputBoxOptions) => Promise<string>;  |
-| dropdown            | ( title: string, items: string[], placeHolder: string, options?: vscode.QuickPickOptions) => Promise<string | undefined>;                     |
+| confirm             | ( title: string, placeHolder?: "Yes" | "No", options?: vscode.QuickPickOptions) => Promise\<boolean\>;     |
+| input               | ( prompt: string, placeHolder: string, options?: vscode.InputBoxOptions) => Promise\<string\>;  |
+| dropdown            | ( title: string, items: string[], placeHolder: string, options?: vscode.QuickPickOptions) => Promise\<string | undefined>\;                     |
 | commandQuickpick    | ( setting: QuickpickSetting) => Promise\<void\>;     |
 
 
