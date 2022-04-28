@@ -4,34 +4,35 @@ Vsce Script is an open-source extension for Visual Studio Code and Vim Extension
 
 Vsce Script provide VS Code extension's runtime, VS Code API and Library for creating smoothly operation at VS Code. You can simply create or open an Vsce Script project, then load it immediately at VS Code.
 
-A Vsce Script project is a typescript project which can be dynamic loaded by Vsce-Script extension.
+A VSce Script project is a typescript project which can be dynamic loaded by Vsce-Script extension.
 
 Since Vsce Script extension inject VS Code and it's library api at global, you can write some script for control your VS Code, extend your vim command or doing something then executing it immediately.
 
 With those API, user can do many of automating operations more than traditional Vim Macro.
 
-Since Vsce Script is an extension playground, you can fulfill your idea with it quickly. If your some of functionality can be a standalone extension. you can migrate it to a extension package and publish it quickly. 
-
-We have already export our library api for third-party vscode extension!
-
-If some of idea that is good for exist extensions, welcome to submit your pull request for them.
-
 ## Main Feature
 
-Here are just some of the features that Vsce-Script provides
+Here are some of the features that Vsce Script provides
 
 1. Open, create, and execute your extension project with javascript and typescript at vscode immediately.
-* You can install third-party npm package at extension project then execute it at vscode immediately.
-2. Inject VS Code API at global for vsce-script extension project.
-3. Commands for search registered command at script project, you can execute or copied their command ID easily.
-4. Built-in Commands and library api for automating your VS Code.
+* We inject VS Code API at global for vsce-script extension project.
+* You can also install third-party npm package at extension project then execute it at vscode immediately.
+2. Commands for search registered command at script project, you can execute or copied their command ID easily.
+3. Custom library api for automating your VS Code command and shell command.
+4. Custom library api for creating readable, editable and reusable macro for vim's operation.
 
 
 ### Make Open Source Community Better!
 
-Since vsce-script is an extension playground, you can fulfill your idea with it quickly. If your some of functionality that can be extract to a standalone extension. you can migrate it to a new extension package and publish it quickly.If you found some idea that can be implement for exist extensions, welcome to submit your pull request for them.
+Since vsce-script can use as an extension playground, you can fulfill your idea with it quickly. If your some of functionality that can be extract to a standalone extension. you can migrate it to a new extension package and publish it quickly.If you found some idea that can be implement for exist extensions, welcome to submit your pull request for them.
 
 ## Get Started
+
+1. Create your project
+
+2. Write, compile and load your vsce-script-project!
+
+3. Execute your commands 
 
 ## Showcases
 
@@ -198,7 +199,7 @@ After you write your custom command, you can invoke `Vsce Script: Load Script Pr
 If your extension project is typescript project
 
 
-1. Readable, editable and persistent macro for Vim's operation
+1. Readable, editable and reusable macro for Vim's operation
 
 Imagine there's a vim operation for select a function or any kinds of block.
 You might create a macro to make this operation easier.
@@ -473,6 +474,12 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | setCursorPosition             | (pos: vscode.Position) => Promise\<any\>;         |
 | getFirstCharOnLine            | ( document: vscode.TextDocument, line: number) => vscode.Position;    |
 | getCharAt                     | ( document: vscode.TextDocument, position: vscode.Position) => string;         |
+
+### Vim
+
+| Function            |  Type Signature                           |
+| ------------------- | ----------------------------------------- |
+| switchToInsertModeSelection  | () => Promise\<boolean\>;     |
 
 ### Interactive
 
