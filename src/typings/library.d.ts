@@ -23,7 +23,7 @@ export interface LibraryApi {
     typeCharUnderCursor: () => Thenable<void>;
     writeText: (text: string) => () => Thenable<void>;
     execCmd: <T = unknown>( cmd: string | { command: string; args: object }) => () => Thenable<T>;
-    execShell: (cmd: string, options: SpawnOptions & { hiddenOutput?: boolean }) => () => Thenable<void>;
+    execShell: (cmd: string, options: SpawnOptions & { hideOutput?: boolean }) => () => Thenable<void>;
     spawnShell: ( cmd: string, args?: string[], option?: SpawnOptions) => () => Thenable<void>;
     runMacro: (typeTexts: string[]) => Thenable<void>;
     runAutomation: (...args: any[]) => Thenable<void>;
@@ -46,6 +46,9 @@ export interface LibraryApi {
     getCursorPosition: () => vscode.Position | undefined;
     setCursorPosition: (pos: vscode.Position) => Promise<any>;
   };
+  vim: {
+    switchToInsertModeSelection: () => Thenable<void>;
+  },
   fs: {
     getCurrentWorkspaceFolder: () => vscode.WorkspaceFolder | undefined;
     copyFileOrFolder: (source: string, target: string, option?: { overwrite: boolean }) => Thenable<void>;
@@ -54,7 +57,7 @@ export interface LibraryApi {
   },
   promise: {
     execCmd: ( payload: string | { command: string; args: object }) => Thenable<unknown>;
-    execShell: (cmd: string, options: SpawnOptions & { hiddenOutput?: boolean }) => () => Thenable<void>;
+    execShell: (cmd: string, options: SpawnOptions & { hideOutput?: boolean }) => () => Thenable<void>;
     spawnShell: ( cmd: string, args?: string[] | undefined, option?: SpawnOptions | undefined) => Thenable<void>;
     typeCharUnderCursor: () => Thenable<void>;
     type: (text: string) => Thenable<void>;
