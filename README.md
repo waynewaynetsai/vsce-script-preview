@@ -1,5 +1,3 @@
-# Vsce Script: automate your VS Code and Vim extension with javascript and typescript conveniently
-
 <h2 align="center"><img src="https://i.imgur.com/3wYl1EU.png" height="128"><br>Vsce Script</h2>
 <p align="center"><strong>Extension runtime with automation api for VS Code and Vim extension</strong></p>
 
