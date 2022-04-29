@@ -1,18 +1,22 @@
 import 'reflect-metadata';
 
 import * as vscode from 'vscode';
-import { Library } from './library/library';
+import { logger } from './logger';
+import { Library } from './library';
 import { Instantiator } from './instantiator';
 import { registerReloadCommand, registerWorkspaceChangeEvent } from './registry';
-import { logger } from './logger';
 
 export async function activate(context: vscode.ExtensionContext) {
 	try {
 		await Instantiator.startup(context);
-		const library = await Instantiator.container.getAsync<Library>(Library);
 		registerWorkspaceChangeEvent(context);
 		registerReloadCommand(context);
-		return await library.getLatestLib();
+		const library = await Instantiator.container.getAsync<Library>(Library);
+		return { 
+			version: library.version,
+			getLatestLib: async () => await library.getLatestLib(),
+			getLib: async (version: string) => await library.getLib(version)
+		};
 	} catch (error: any) {
 		const msg = 'Vsce-Script Unexpected Error';
 		logger.error(`[${msg}] ${error.message}`);
