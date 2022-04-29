@@ -10,8 +10,6 @@ import fse from 'fs-extra';
 
 const vscodeApi: typeof vscode = require('vscode');
 
-declare const __webpack_require__: any;
-declare const __non_webpack_require__: any;
 
 interface VsceScriptModule {
     vscode: typeof vscode;
