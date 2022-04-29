@@ -27,7 +27,7 @@ export async function createProject() {
         }
     }
     // STEP1: ask typescript or javascript
-    const projectType: string | undefined = await dropdown('Create Typescript or Javascript script project?', [
+    const projectType: string | undefined = await dropdown('Create typescript or javascript project?', [
         'javascript',
         'typescript'
     ], { placeHolder: 'typescript' });
