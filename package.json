@@ -33,6 +33,10 @@
 				"command": "vsce-script.createProject"
 			},
 			{
+				"title": "Vsce Script: Select Another Script Project",
+				"command": "vsce-script.selectAnotherScriptProject"
+			},
+			{
 				"title": "Vsce Script: Show All Commands",
 				"command": "vsce-script.showAllCommands"
 			},
