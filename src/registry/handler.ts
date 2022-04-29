@@ -11,6 +11,7 @@ import { CommandRegistry } from "./registry";
 import { CommandTable } from "./table";
 import { Library } from "../library";
 import editJsonFile from "edit-json-file";
+import { ScriptLoader } from "../loader";
 
 // Dirty code here, take it easy!
 export async function createProject() {
@@ -30,7 +31,7 @@ export async function createProject() {
     const projectType: string | undefined = await dropdown('Create typescript or javascript project?', [
         'javascript',
         'typescript'
-    ], { placeHolder: 'typescript' });
+    ], { placeHolder: `Select your project's language` });
     if (!projectType)
         return;
     // STEP2: select folder
@@ -45,7 +46,7 @@ export async function createProject() {
         return;
     if (!projectUris?.[0])
         return;
-    const projectName = await input('Input your project name', { placeHolder: 'vsce-script-project' });
+    const projectName = await input('Input your project name', { placeHolder: 'Your project name' });
     if (!projectName || projectName === '') return;
     console.log('projectName', projectName);
     const projectPath = path.join(projectUris?.[0].fsPath, projectName);
@@ -64,11 +65,14 @@ export async function createProject() {
     console.log('Step3', projectPath);
     // STEP3: generate project template/copy file or folder
     try {
-        const projectTemplatePath = path.resolve(__dirname, `../template/${projectType}`);
+        const lib = await Instantiator.container.getAsync<Library>(Library);
+        const projectTemplatePath = path.join(__dirname, `template`, `version-${lib.version}`, `${projectType}`);
+        console.log('projectTemplatePath', projectTemplatePath);
         await copyFileOrFolder(projectTemplatePath, projectPath, { overwrite: false });
     } catch (err) {
         logger.error(`Fail to create script project: ${JSON.stringify(err)}`);
         vscode.window.showErrorMessage(`Fail to create script project: ${JSON.stringify(err)}`);
+        return;
     }
     const useNpm = await dropdown('Use yarn or npm ?', ['yarn', 'npm'], { placeHolder: 'npm' }) === 'npm';
     const newWindow = await confirm('Open project at new window?');
@@ -78,6 +82,26 @@ export async function createProject() {
         // STEP5: open project folder
         openProject(projectPath, { newWindow })
     ]);
+}
+
+export async function selectAnotherScriptProject() {
+    const projectUris = await vscode.window.showOpenDialog({
+        title: 'Select another Vsce Script project',
+        openLabel: 'Select Vsce Script project folder',
+        canSelectFolders: true,
+        canSelectFiles: false,
+        defaultUri: vscode.workspace.workspaceFolders?.[0].uri
+    });
+    if (!projectUris)
+        return;
+    if (!projectUris?.[0])
+        return;
+    const projectPath = path.join(projectUris?.[0].fsPath);
+    await vscode.workspace.getConfiguration('vsce-script')
+        .update('projectPath', path.resolve(projectPath));
+    await openScriptProject();
+    const scriptLoader = await Instantiator.container.getAsync<ScriptLoader>(ScriptLoader);
+    await scriptLoader.load();
 }
 
 export const openScriptProject = async () => {
@@ -162,7 +186,7 @@ export const showAllCommands = (table: CommandTable) => async (namespaces: strin
 };
 
 export const copyRegisteredCommandId = (table: CommandTable) => async () => {
-    const commandIds = Object.keys(table.getAll()); 
+    const commandIds = Object.keys(table.getAll());
     const commandId = await dropdown('Show all commands', commandIds);
     if (commandId && commandId !== '') {
         await vscode.env.clipboard.writeText(commandId);
@@ -185,12 +209,12 @@ export const commandQuickpick = async (setting: QuickpickSetting) => {
 };
 
 export const upgradeLibraryToLatestVersion = async () => {
-   const projectPath = await vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
-   if (!projectPath) return;
-   const library = await Instantiator.container.getAsync<Library>(Library);
-   const libraryTypingsPath = path.resolve(projectPath, 'typings', 'library.d.ts');
-   await copyFileOrFolder(libraryTypingsPath, `./template/version/version-${library.version}/typings/library.d.ts`, { overwrite: true });
-   const file = editJsonFile(path.join(projectPath, 'package.json'));
-   file.set('version', library.version);
-   file.save();
+    const projectPath = await vscode.workspace.getConfiguration('vsce-script').get<string>('projectPath');
+    if (!projectPath) return;
+    const library = await Instantiator.container.getAsync<Library>(Library);
+    const libraryTypingsPath = path.resolve(projectPath, 'typings', 'library.d.ts');
+    await copyFileOrFolder(libraryTypingsPath, `./template/version/version-${library.version}/typings/library.d.ts`, { overwrite: true });
+    const file = editJsonFile(path.join(projectPath, 'package.json'));
+    file.set('version', library.version);
+    file.save();
 };
