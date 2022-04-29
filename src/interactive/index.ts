@@ -1,23 +1,26 @@
 import * as vscode from 'vscode';
 
-export const dropdown = async (title: string, items: string[], placeHolder: string, options: vscode.QuickPickOptions = {}) => {
-   return await vscode.window.showQuickPick(items, {
-       canPickMany: false,
-       placeHolder,
-       title,
-       ...options
-   });
-};
 
-export const input = async (prompt: string, placeHolder: string, options: vscode.InputBoxOptions = {}) => (await vscode.window.showInputBox({
-    placeHolder,
-    prompt,
-    ...options
-})) || '';
+export async function dropdown(title: string, items: string[], options: vscode.QuickPickOptions = {}) {
+    return await vscode.window.showQuickPick(items, {
+        canPickMany: false,
+        title,
+        ...options
+    });
+}
 
-export const confirm = async (title: string, placeHolder: 'Yes' | 'No' = 'Yes', options: vscode.QuickPickOptions = {}) => await vscode.window.showQuickPick(['Yes', 'No'], {
-    title,
-    canPickMany: false,
-    placeHolder,
-    ...options
-}).then(answer => answer === 'Yes');
+export async function input(prompt: string, options: vscode.InputBoxOptions = {}) {
+    return (await vscode.window.showInputBox({
+        prompt,
+        ...options
+    })) || '';
+}
+
+export async function confirm(title: string, placeHolder: 'Yes' | 'No' = 'Yes', options: vscode.QuickPickOptions = {}) {
+    return await vscode.window.showQuickPick(['Yes', 'No'], {
+        title,
+        canPickMany: false,
+        placeHolder,
+        ...options
+    }).then(answer => answer === 'Yes');
+}
