@@ -95,6 +95,13 @@ You will see all commands which are registered from library's registerCommand ap
 
 You can execute those commands with selecting menu item. 
 
+![](https://i.imgur.com/1LO3RcP.png)
+
+And see the result immediately.
+
+![](https://i.imgur.com/YNCpaMA.png)
+
+
 If you just want to copy those command's id, you can use `vsce-script.copyRegisteredCommandId` command.
 
 ![](https://i.imgur.com/DkshJgg.png)
