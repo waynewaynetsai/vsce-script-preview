@@ -44,7 +44,6 @@ export const getLib = async () => {
             getCharAt,
             getSelectedText,
             getCharUnderCursor,
-            findFirstOccurCharAtLine,
             findFirstOccurCharAboveCursor,
             getCursorPosition,
             setCursorPosition

@@ -41,7 +41,6 @@ export interface LibraryApi {
     getSelectedText: () => string | undefined;
     getCharUnderCursor: () => string | undefined;
     getFirstCharOnLine: ( document: vscode.TextDocument, line: number) => vscode.Position;
-    findFirstOccurCharAtLine: ( chars: string[], line: number, start: number) => string | undefined;
     findFirstOccurCharAboveCursor: (chars: string[]) => string | undefined;
     getCursorPosition: () => vscode.Position | undefined;
     setCursorPosition: (pos: vscode.Position) => Promise<any>;
