@@ -545,7 +545,7 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | findFirstOccurCharAtLine      | ( chars: string[], line: number, start: number) => string \| undefined;                      |
 | findFirstOccurCharAboveCursor | (chars: string[]) => string \| undefined;        |
 | getCursorPosition             | () => vscode.Position \| undefined;              |
-| setCursorPosition             | (pos: vscode.Position) => Promise\<any\>;         |
+| setCursorPosition             | (pos: vscode.Position) => Promise\<any\>;        |
 | getFirstCharOnLine            | ( document: vscode.TextDocument, line: number) => vscode.Position;    |
 | getCharAt                     | ( document: vscode.TextDocument, position: vscode.Position) => string;         |
 
@@ -554,6 +554,11 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | Function            |  Type Signature                           |
 | ------------------- | ----------------------------------------- |
 | switchToInsertModeSelection  | () => Promise\<boolean\>;     |
+
+### fs
+
+| getCurrentWorkspaceFolder     | () => Promise\<vsc.WorkspaceFolder | undefined\>;|
+| copyFileOrFolder            | (source: string, target: string, option?: { overwrite: boolean; }) => Thenable<void> | 
 
 ### Interactive
 
@@ -573,6 +578,7 @@ registerCommand('vsce-script.ext.disableReactExtensions', async () => {
 | -------------------------- | ------- | ------------------------------------------ |
 | Open Project               | command |  `vsce-script.openProject`                 |
 | Create Script Project      | command |  `vsce-script.createProject`               |
+| Select Another Script Project | command |  `vsce-script.selectAnotherScriptProject` |
 | Show All Commands          | command |  `vsce-script.showAllCommands`             |
 | Copy Registered Command ID | command |  `vsce-script.copyRegisteredCommandId`     |
 | Rerun Last Command         | command |  `vsce-script.rerunLastCommand`            |
