@@ -15,7 +15,8 @@
 	],
 	"main": "./dist/extension.js",
 	"extensionDependencies": [
-		"IBM.output-colorizer"
+		"IBM.output-colorizer",
+		"vscodevim.vim"
 	],
 	"contributes": {
 		"commands": [
@@ -49,7 +50,7 @@
 			}
 		],
 		"configuration": {
-			"title": "VSCE Script",
+			"title": "Vsce Script",
 			"properties": {
 				"vsce-script.projectPath": {
 					"type": "string",
@@ -60,65 +61,6 @@
 					"type": "string",
 					"default": "vsce-script",
 					"description": "Vsce Script Command prefix"
-				},
-				"practice-workspace.input": {
-					"type": "string",
-					"default": "defaultValue",
-					"description": "provide a input for accepting value"
-				},
-				"practice-workspace.inputNum": {
-					"type": "number",
-					"default": "1.001",
-					"description": "provide a input for accepting number"
-				},
-				"practice-workspace.inputInt": {
-					"type": "integer",
-					"default": "1",
-					"markdownDescription": "MarkdownDescription: provide a input for accepting integer, See the [VSCode Docs](https://code.visualstudio.com/api/references/contribution-points#contributes.configuration) for more details.\n - 0: item1\n - 1: itemb"
-				},
-				"practice-workspace.checkbox": {
-					"type": "boolean",
-					"default": "0",
-					"description": "provide a checkbox"
-				},
-				"practice-workspace.dropdown": {
-					"type": "string",
-					"default": "defaultValue",
-					"enum": [
-						"optionA",
-						"optionB",
-						"optionC"
-					],
-					"description": "provide a dropdown and options",
-					"enumDescriptions": [
-						"description for option A",
-						"description for option B",
-						"description for option C"
-					]
-				},
-				"practice-workspace.array": {
-					"type": "array",
-					"default": [
-						"defaultValue"
-					],
-					"description": "array settings is only available at settings.json"
-				},
-				"practice-workspace.object": {
-					"type": "object",
-					"default": {
-						"key": "defaultValue"
-					},
-					"description": "object settings is only available at settings.json"
-				},
-				"practice-workspace.null.a": {
-					"type": null,
-					"default": null,
-					"description": "null settings for showing group feature"
-				},
-				"practice-workspace.null.b": {
-					"type": null,
-					"default": null,
-					"description": "null settings for showing group feature"
 				}
 			}
 		}
