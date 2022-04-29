@@ -1,12 +1,15 @@
 # Vsce Script: automate your VS Code and Vim extension with javascript and typescript conveniently
 
-Vsce Script is an open-source extension for Visual Studio Code and Vim Extension.
+<h2 align="center"><img src="https://i.imgur.com/3wYl1EU.png" height="128"><br>Vsce Script</h2>
+<p align="center"><strong>Extension runtime with automation api for VS Code and Vim extension</strong></p>
 
-Vsce Script provide VS Code extension's runtime, VS Code API and Library for creating smoothly operation at VS Code. You can simply create or open an Vsce Script project, then load it immediately at VS Code.
+Vsce Script is a VS Code extension runtime with automation api for [VS Code](https://code.visualstudio.com/) and [Vim](https://github.com/VSCodeVim/Vim) extension.
 
-A VSce Script project is a typescript project which can be dynamic loaded by Vsce-Script extension.
+Vsce Script provide VS Code API and Library for creating smoothly operation at VS Code. You can simply create or open an Vsce Script project, then load it immediately at VS Code.
 
-Since Vsce Script extension inject VS Code and it's library api at global, you can write some script for control your VS Code, extend your vim command or doing something then executing it immediately.
+A Vsce Script project is a typescript or javascript project which can be dynamic loaded by Vsce-Script extension.
+
+Since Vsce Script extension inject VS Code api and it's library at global, you can write some script for control your VS Code, extend your vim command or doing something then executing it immediately.
 
 With those API, user can do many of automating operations more than traditional Vim Macro.
 
@@ -24,15 +27,79 @@ Here are some of the features that Vsce Script provides
 
 ### Make Open Source Community Better!
 
-Since vsce-script can use as an extension playground, you can fulfill your idea with it quickly. If your some of functionality that can be extract to a standalone extension. you can migrate it to a new extension package and publish it quickly.If you found some idea that can be implement for exist extensions, welcome to submit your pull request for them.
+Since vsce-script can use as an extension playground, you can fulfill your idea with it quickly. If your some of functionality that can be extract to a standalone extension. you can migrate it to a new extension package and publish it quickly. If you found some idea that can be implement for exist extensions, welcome to submit your pull request for them.
+
+### Requirements
+
+You need to install [nodejs](https://nodejs.org/en/) and npm on your computer. If you want to use [yarn](https://classic.yarnpkg.com/lang/en/docs/install/) to manage your project's package, please install it first.
+
 
 ## Get Started
 
 1. Create your project
 
+We provide a `vsce-script.createProject` command for creating vsce-script template project.
+
+You can find and execute this command at command palette (Command Palette Shortcut - MacOS: `cmd+shift+p`, Windows/Linux: ctrl+shift+p).
+
+![](https://i.imgur.com/DXdWapL.png)
+
+After executing this command, you need to select your project languages first, we recommend you to select **typescript**.
+
+![](https://i.imgur.com/N7fo0fY.png)
+
+After selecting project's language, select a location of your project's directory, then click **Create Project** button.
+
+![](https://i.imgur.com/9GqLxnM.png)
+
+At last step, please provide your custom project name.
+
+![](https://i.imgur.com/ylK0y43.png)
+
+After providing your project name (please don't provide empty string), we will creating a project at background.
+
+You can choose use `npm` or `yarn` package for installing your packages.
+
+Finally, you can open your script project at a new VS Code window or open it at current editor.
+
+![](https://i.imgur.com/r15iUXR.png)
+
+After you creating a project, you can use `vsce-script.openProject` command for opening it.
+
 2. Write, compile and load your vsce-script-project!
 
+A Vsce Script project is a nodejs project which exports activate and deactivate function on their entry point file (extension.js).
+
+![](https://i.imgur.com/9b7qJgO.png)
+
+Since Vsce Script Extension injects VS Code api and lib at project's global.
+You can use them conveniently at Vsce Script project.
+
+When you write down your script, just execute `Vsce Script: Load Script Project` on command palette.
+
+If your project is written by typescript, extension will ask you whether compile typescript or not.
+
+After compiling it, extension will load your project's `extension.js` file.
+
+You can see registered commands by executing `Vsce Script: Show All Commands` on command palette.
+
 3. Execute your commands 
+
+Select and execute `vsce-script.showAllCommands` at command palette.
+
+![](https://i.imgur.com/igTQLGr.png)
+
+You will see all commands which are registered from library's registerCommand api.
+
+![](https://i.imgur.com/adWxBVR.png)
+
+You can execute those commands with selecting menu item. 
+
+If you just want to copy those command's id, you can use `vsce-script.copyRegisteredCommandId` command.
+
+![](https://i.imgur.com/DkshJgg.png)
+
+Then copy selected commandId from the menu.
 
 ## Showcases
 
@@ -281,6 +348,7 @@ const {
     interactive: { confirm }
 } = lib;
 
+export function activate(context: vsc.ExtensionContext) {
     ...
     registerCommand('vsce-script.vim.deleteSurround', async () => {
         const charUnderCursor = getCharUnderCursor();
@@ -294,6 +362,7 @@ const {
         }
     });
     ...
+}
 ```
 
 After that, we can bind this command at VSCodeVim's `.vimrc`.
