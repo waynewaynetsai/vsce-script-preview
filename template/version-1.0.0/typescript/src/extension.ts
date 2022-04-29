@@ -7,8 +7,8 @@ const { commands: { registerCommand }} = lib;
 
 export function activate(context: vsc.ExtensionContext) {
     window.showInformationMessage(`activate vsce-script: ${context.extension.packageJSON.version}`);
-    registerCommand('vsce-script.hello world', () => {
-        window.showInformationMessage('Hello Vsce-Script');
+    registerCommand('vsce-script.helloworld', () => {
+        window.showInformationMessage('Hello Vsce-Script!');
     });
 }
 
