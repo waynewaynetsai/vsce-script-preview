@@ -275,6 +275,9 @@ If your extension project is typescript project
 1. Readable, editable and reusable macro for Vim's operation
 
 Imagine there's a vim operation for select a function or any kinds of block.
+
+![vak](https://media.giphy.com/media/2vSnuO3Plaqg4DXZ7D/giphy.gif)
+
 You might create a macro to make this operation easier.
 
 At VSCodeVim's `.vimrc`, we can define a custom keybindings `vak` for select it.
@@ -283,7 +286,6 @@ At VSCodeVim's `.vimrc`, we can define a custom keybindings `vak` for select it.
 xmap ak <Esc>V$%$h
 ```
 
-![vak](https://media.giphy.com/media/2vSnuO3Plaqg4DXZ7D/giphy.gif)
 
 But it's hard to read and understand.
 
