@@ -268,6 +268,7 @@ export function activate(context: vsc.ExtensionContext) {
 ```
 
 After you write your custom command, you can invoke `Vsce Script: Load Script Project` command from VS Code's command palette.
+
 If your extension project is typescript project
 
 
@@ -282,7 +283,9 @@ At VSCodeVim's `.vimrc`, we can define a custom keybindings `vak` for select it.
 xmap ak <Esc>V$%$h
 ```
 
-It's hard to read and understand.
+![vak](https://media.giphy.com/media/2vSnuO3Plaqg4DXZ7D/giphy.gif)
+
+But it's hard to read and understand.
 
 With javascript, we can write a editable and reusable macro with below example:
 
