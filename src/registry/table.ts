@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { switchToInsertModeSelection } from '../editor';
-import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, rerunLastCommand, showAllCommands, surroundWith, visualModeYank, copyRegisteredCommandId, selectAnotherScriptProject } from './handler';
+import { addBracket, commandQuickpick, createProject, insertDeclaration, openScriptProject, rerunLastCommand, showAllCommands, surroundWith, visualModeYank, copyRegisteredCommandId, selectAnotherScriptProject, upgradeLibraryToLatestVersion } from './handler';
 
 export class CommandTable {
     private scriptCommands: string[] = [];
@@ -8,6 +8,7 @@ export class CommandTable {
     private userFacingCommands = {
         openProject: openScriptProject,
         createProject,
+        upgradeLibrary: upgradeLibraryToLatestVersion,
         selectAnotherScriptProject,
         rerunLastCommand,
         showAllCommands: showAllCommands(this),
