@@ -276,7 +276,7 @@ If your extension project is typescript project
 
 Imagine there's a vim operation for select a function or any kinds of block.
 
-![vak](https://media.giphy.com/media/2vSnuO3Plaqg4DXZ7D/giphy.gif)
+![vak](https://media.giphy.com/media/BNcffpGPQN4XeueKDG/giphy.gif)
 
 You might create a macro to make this operation easier.
 
@@ -381,6 +381,8 @@ After that, we can bind this command at VSCodeVim's `.vimrc`.
 nmap da vsce-script.vim.deleteSurround
 ```
 
+![da](https://media.giphy.com/media/HNqBFKuuHq3kHk6hAP/giphy.gif)
+
 - Custom operation for VSCodeVim's Vim-surround plugin (Change Surround)
 
 ```
@@ -412,6 +414,8 @@ After that, we can bind this command at VSCodeVim's `.vimrc`.
 ```
 nmap ca vsce-script.vim.changeSurround
 ```
+
+![ca](https://media.giphy.com/media/UmJ3FyKoto9nVspAW6/giphy.gif)
 
 5. Integrate [Surround](https://marketplace.visualstudio.com/items?itemName=yatki.vscode-surround) extension with VSCodeVim (Workaround insertSnippet problem at VSCodeVim v0.1.23)
 
